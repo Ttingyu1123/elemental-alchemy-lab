@@ -24,6 +24,11 @@
   background: rgba(15, 12, 32, 0.85);
   box-shadow: 0 0 40px rgba(90, 60, 200, 0.25), inset 0 0 60px rgba(0,0,0,0.5);
   max-height: 100%;
+  /* 手勢層必備：擋掉瀏覽器捲動/縮放手勢與長按選取 */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .side-left, .side-right {

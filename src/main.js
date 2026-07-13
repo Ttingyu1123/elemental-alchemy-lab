@@ -47,6 +47,11 @@ class App {
       if (cell) sess.spells.onCellPicked(cell.r, cell.c);
     });
 
+    // 棋盤手勢操作（觸控／滑鼠皆可）；法術選格時停用讓位給上面的點擊
+    this.input.bindGestures(canvas, {
+      isBlocked: () => !this.session || this.paused || this.sessionEnded || this.session.spells.pending,
+    });
+
     // 首次互動解鎖 AudioContext
     const unlock = () => {
       this.audio.ensure();
