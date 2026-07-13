@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>元素煉金工坊 Elemental Alchemy Lab</title>
+<link rel="stylesheet" href="/src/styles/main.css" />
+<link rel="stylesheet" href="/src/styles/game.css" />
+<link rel="stylesheet" href="/src/styles/panels.css" />
+<link rel="stylesheet" href="/src/styles/responsive.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══ 主選單 ═══ -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-glow"></div>
+    <div class="alchemy-circle"></div>
+    <h1 class="game-title"><span class="title-rune">✦</span> 元素煉金工坊 <span class="title-rune">✦</span></h1>
+    <p class="game-subtitle">Elemental Alchemy Lab</p>
+    <nav class="menu-buttons">
+      <button id="btn-continue" class="menu-btn primary" aria-label="繼續遊戲">繼續遊戲</button>
+      <button id="btn-start" class="menu-btn primary" aria-label="開始遊戲">開始遊戲</button>
+      <button id="btn-levels" class="menu-btn" aria-label="關卡選擇">關卡選擇</button>
+      <button id="btn-endless" class="menu-btn" aria-label="無限模式">無限模式</button>
+      <button id="btn-codex" class="menu-btn" aria-label="煉金圖鑑">煉金圖鑑</button>
+      <button id="btn-settings" class="menu-btn" aria-label="設定">設定</button>
+      <button id="btn-wipe" class="menu-btn danger" aria-label="清除存檔">清除存檔</button>
+    </nav>
+    <p class="menu-footer">鍵盤：←→ 移動 · ↑/W 旋轉 · Z 逆旋 · ↓ 加速 · Space 落下 · C 暫存 · P 暫停</p>
+  </section>
+
+  <!-- ═══ 關卡選擇 ═══ -->
+  <section id="screen-levels" class="screen">
+    <header class="screen-header">
+      <button class="back-btn" data-back aria-label="返回主選單">← 返回</button>
+      <h2>關卡選擇</h2>
+    </header>
+    <div id="level-grid" class="level-grid"></div>
+  </section>
+
+  <!-- ═══ 圖鑑 ═══ -->
+  <section id="screen-codex" class="screen">
+    <header class="screen-header">
+      <button class="back-btn" data-back aria-label="返回主選單">← 返回</button>
+      <h2>煉金圖鑑</h2>
+      <div class="codex-tabs">
+        <button id="tab-elements" class="tab-btn active" aria-label="元素圖鑑">元素</button>
+        <button id="tab-reactions" class="tab-btn" aria-label="反應圖鑑">反應</button>
+      </div>
+    </header>
+    <div id="codex-content" class="codex-content"></div>
+  </section>
+
+  <!-- ═══ 設定 ═══ -->
+  <section id="screen-settings" class="screen">
+    <header class="screen-header">
+      <button class="back-btn" data-back aria-label="返回">← 返回</button>
+      <h2>設定</h2>
+    </header>
+    <div class="settings-body">
+      <label class="setting-row"><span>音效</span><input type="checkbox" id="set-sfx" aria-label="音效開關" /></label>
+      <label class="setting-row"><span>背景音樂</span><input type="checkbox" id="set-music" aria-label="背景音樂開關" /></label>
+      <label class="setting-row"><span>音量</span><input type="range" id="set-volume" min="0" max="100" aria-label="音量調整" /></label>
+      <label class="setting-row"><span>降低特效</span><input type="checkbox" id="set-reduced" aria-label="降低動畫特效" /></label>
+      <button id="btn-replay-tutorial" class="menu-btn" aria-label="重新觀看教學">重新觀看教學（下次進入第 1 關時）</button>
+      <div class="settings-help">
+        <h3>操作說明</h3>
+        <p>A／← 左移 · D／→ 右移 · S／↓ 加速下落<br/>
+        W／↑ 順時針旋轉 · Z 逆時針旋轉<br/>
+        Space 瞬間落下 · C 暫存方塊 · P／Esc 暫停</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 遊戲畫面 ═══ -->
+  <section id="screen-game" class="screen">
+    <div class="game-layout">
+
+      <aside class="side-left panel">
+        <div class="hold-box">
+          <h3>暫存 <kbd>C</kbd></h3>
+          <canvas id="hold-canvas" width="96" height="96"></canvas>
+        </div>
+        <div id="boss-panel" class="boss-panel hidden">
+          <h3 id="boss-name">Boss</h3>
+          <div class="boss-hp-wrap"><div id="boss-hp" class="boss-hp"></div></div>
+          <div id="boss-phase" class="boss-phase"></div>
+          <div id="boss-next" class="boss-next"></div>
+        </div>
+        <div class="objectives-box">
+          <h3 id="level-name">關卡</h3>
+          <ul id="objective-list" class="objective-list"></ul>
+          <div id="limit-display" class="limit-display"></div>
+        </div>
+        <div class="spell-panel" id="spell-panel"></div>
+        <div class="energy-box">
+          <h3>煉金能量</h3>
+          <div class="energy-bar-wrap"><div id="energy-bar" class="energy-bar"></div><span id="energy-text" class="energy-text">0/100</span></div>
+        </div>
+      </aside>
+
+      <main class="board-wrap">
+        <canvas id="board-canvas" aria-label="遊戲棋盤"></canvas>
+        <div id="target-hint" class="target-hint hidden"></div>
+        <div id="chain-banner" class="chain-banner hidden"></div>
+      </main>
+
+      <aside class="side-right panel">
+        <div class="next-box">
+          <h3>下一個</h3>
+          <canvas id="next-canvas" width="96" height="260"></canvas>
+        </div>
+        <div class="stat-box">
+          <h3>分數</h3><div id="score-display" class="stat-num">0</div>
+          <h3>連鎖</h3><div id="chain-display" class="stat-num">—</div>
+          <h3>最高連鎖</h3><div id="maxchain-display" class="stat-num">0</div>
+          <h3 id="speed-label" class="hidden">等級</h3><div id="speed-display" class="stat-num hidden">1</div>
+        </div>
+        <button id="btn-reroll" class="spell-btn hidden" aria-label="風之羽重抽">🪶 重抽下一個</button>
+        <button id="btn-pause" class="spell-btn" aria-label="暫停遊戲">⏸ 暫停 <kbd>P</kbd></button>
+        <div class="reaction-log-box">
+          <h3>反應紀錄</h3>
+          <ul id="reaction-log" class="reaction-log"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 觸控按鈕 -->
+    <div id="touch-controls" class="touch-controls">
+      <div class="touch-group">
+        <button data-act="left" class="touch-btn" aria-label="向左移動">◀</button>
+        <button data-act="right" class="touch-btn" aria-label="向右移動">▶</button>
+        <button data-act="soft" class="touch-btn" aria-label="加速下落">▼</button>
+      </div>
+      <div class="touch-group">
+        <button data-act="ccw" class="touch-btn" aria-label="逆時針旋轉">⟲</button>
+        <button data-act="cw" class="touch-btn" aria-label="順時針旋轉">⟳</button>
+        <button data-act="hold" class="touch-btn" aria-label="暫存方塊">⇄</button>
+        <button data-act="hard" class="touch-btn wide" aria-label="瞬間落下">⤓ 落下</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 暫停 modal ═══ -->
+  <div id="modal-pause" class="modal hidden">
+    <div class="modal-box panel">
+      <h2>暫停中</h2>
+      <button id="btn-resume" class="menu-btn primary" aria-label="繼續">繼續</button>
+      <button id="btn-restart" class="menu-btn" aria-label="重新開始">重新開始</button>
+      <label class="setting-row"><span>音效</span><input type="checkbox" id="pause-sfx" aria-label="音效開關" /></label>
+      <label class="setting-row"><span>降低特效</span><input type="checkbox" id="pause-reduced" aria-label="降低特效" /></label>
+      <div class="settings-help small">
+        <p>←→ 移動 · ↑ 旋轉 · Z 逆旋 · ↓ 加速<br/>Space 落下 · C 暫存 · P 暫停</p>
+      </div>
+      <button id="btn-quit" class="menu-btn danger" aria-label="返回主選單">返回主選單</button>
+    </div>
+  </div>
+
+  <!-- ═══ 結算 modal ═══ -->
+  <div id="modal-result" class="modal hidden">
+    <div class="modal-box panel">
+      <h2 id="result-title">結算</h2>
+      <div id="result-stars" class="result-stars"></div>
+      <div id="result-body" class="result-body"></div>
+      <div class="result-buttons">
+        <button id="btn-next-level" class="menu-btn primary" aria-label="下一關">下一關</button>
+        <button id="btn-retry" class="menu-btn" aria-label="重新挑戰">重新挑戰</button>
+        <button id="btn-result-menu" class="menu-btn" aria-label="返回選單">返回選單</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 遺物三選一 ═══ -->
+  <div id="modal-relic" class="modal hidden">
+    <div class="modal-box panel">
+      <h2>✦ 選擇一件煉金遺物 ✦</h2>
+      <div id="relic-choices" class="relic-choices"></div>
+    </div>
+  </div>
+
+  <!-- ═══ 法術元素選擇 ═══ -->
+  <div id="modal-element-pick" class="modal hidden">
+    <div class="modal-box panel">
+      <h2>選擇元素</h2>
+      <div id="element-pick-list" class="element-pick-list"></div>
+      <button id="btn-cancel-pick" class="menu-btn" aria-label="取消">取消</button>
+    </div>
+  </div>
+
+  <!-- ═══ 確認 modal ═══ -->
+  <div id="modal-confirm" class="modal hidden">
+    <div class="modal-box panel">
+      <h2 id="confirm-title">確認</h2>
+      <p id="confirm-text"></p>
+      <div class="result-buttons">
+        <button id="btn-confirm-yes" class="menu-btn danger" aria-label="確認">確認</button>
+        <button id="btn-confirm-no" class="menu-btn" aria-label="取消">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 教學 overlay ═══ -->
+  <div id="tutorial-overlay" class="tutorial-overlay hidden">
+    <div class="tutorial-box panel">
+      <div id="tutorial-text"></div>
+      <div class="tutorial-buttons">
+        <button id="btn-tut-next" class="menu-btn primary hidden" aria-label="繼續教學">繼續</button>
+        <button id="btn-tut-skip" class="menu-btn small" aria-label="略過教學">略過教學</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 發現提示 toast ═══ -->
+  <div id="toast-area" class="toast-area"></div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+/* ═══ 關卡選擇 ═══ */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  width: 100%; max-width: 1080px;
+  padding: 16px 24px 40px;
+}
+.level-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(232, 194, 106, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+}
+.level-card:hover:not(.locked) { transform: translateY(-3px); box-shadow: var(--glow); border-color: var(--gold); }
+.level-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.7); }
+.level-card h3 { color: var(--gold); font-size: 1rem; margin-bottom: 4px; }
+.level-card .lv-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; min-height: 34px; }
+.level-card .lv-stars { margin-top: 8px; color: var(--gold); letter-spacing: 3px; }
+.level-card .lv-stars .off { opacity: 0.25; }
+.level-card.boss-card { border-color: rgba(208, 90, 110, 0.6); }
+.level-card.boss-card h3 { color: var(--danger); }
+
+/* ═══ 圖鑑 ═══ */
+.codex-tabs { margin-left: auto; display: flex; gap: 6px; }
+.tab-btn {
+  background: none; border: 1px solid rgba(232,194,106,0.3); border-radius: 8px;
+  color: var(--text-dim); padding: 7px 18px; cursor: pointer;
+}
+.tab-btn.active { color: var(--gold); border-color: var(--gold); }
+
+.codex-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  width: 100%; max-width: 1080px;
+  padding: 16px 24px 40px;
+}
+.codex-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(232,194,106,0.2);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.codex-card.undiscovered { opacity: 0.55; }
+.codex-icon {
+  width: 44px; height: 44px; flex: 0 0 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 800;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.codex-card h4 { color: var(--gold); font-size: 0.95rem; margin-bottom: 3px; }
+.codex-card p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.45; }
+.codex-card .codex-meta { font-size: 0.72rem; color: var(--gold-dim); margin-top: 4px; }
+
+/* ═══ 設定 ═══ */
+.settings-body { width: min(440px, 90vw); display: flex; flex-direction: column; gap: 14px; padding: 20px 0 40px; }
+.setting-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid rgba(232,194,106,0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+.setting-row input[type="range"] { width: 55%; accent-color: var(--gold); }
+.setting-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--gold); }
+.settings-help { color: var(--text-dim); font-size: 0.85rem; line-height: 1.7; padding: 10px 4px; }
+.settings-help.small { font-size: 0.78rem; }
+.settings-help h3 { color: var(--gold); margin-bottom: 6px; }
+
+/* ═══ 結算 ═══ */
+.result-stars { font-size: 2.2rem; letter-spacing: 8px; color: var(--gold); text-shadow: var(--glow); }
+.result-stars .off { opacity: 0.22; }
+.result-body { text-align: left; font-size: 0.9rem; line-height: 1.8; color: var(--text-dim); }
+.result-body b { color: var(--gold); }
+.result-body .result-section { margin-top: 8px; border-top: 1px solid rgba(232,194,106,0.15); padding-top: 8px; }
+.result-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ═══ 遺物 ═══ */
+.relic-choices { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.relic-card {
+  width: 160px;
+  background: rgba(30, 24, 60, 0.9);
+  border: 1px solid rgba(232,194,106,0.35);
+  border-radius: 12px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  color: var(--text);
+  font: inherit;
+}
+.relic-card:hover { transform: translateY(-4px); box-shadow: var(--glow); border-color: var(--gold); }
+.relic-card .relic-icon { font-size: 2rem; margin-bottom: 8px; }
+.relic-card h4 { color: var(--gold); font-size: 0.92rem; margin-bottom: 6px; }
+.relic-card p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
+
+/* ═══ 元素選擇 ═══ */
+.element-pick-list { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.element-pick-btn {
+  width: 74px; height: 74px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.25);
+  cursor: pointer;
+  font-size: 0.8rem; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 3px #000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.element-pick-btn:hover { border-color: #fff; transform: scale(1.06); }
+
+/* ═══ 教學 ═══ */
+.tutorial-overlay {
+  position: fixed; left: 0; right: 0; bottom: 90px;
+  display: flex; justify-content: center;
+  z-index: 55; pointer-events: none;
+}
+.tutorial-box {
+  pointer-events: auto;
+  padding: 16px 22px;
+  max-width: min(480px, 90vw);
+  border-color: var(--gold);
+  box-shadow: var(--glow);
+  text-align: center;
+}
+.tutorial-box #tutorial-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px; }
+.tutorial-box #tutorial-text b { color: var(--gold); }
+.tutorial-buttons { display: flex; gap: 10px; justify-content: center; }

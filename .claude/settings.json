@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node -v)",
+      "PowerShell(npm -v)",
+      "PowerShell($env:PYTHONUTF8='1'; python \"C:\\\\Users\\\\tingy\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--VibeCoding-Game-block\\\\9db466f8-36a3-40d0-a8d7-8abef1fd9c52\\\\scratchpad\\\\test_game.py\")",
+      "PowerShell($env:PYTHONUTF8='1'; python \"C:\\\\Users\\\\tingy\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--VibeCoding-Game-block\\\\9db466f8-36a3-40d0-a8d7-8abef1fd9c52\\\\scratchpad\\\\test_mechanics.py\")",
+      "PowerShell($env:PYTHONUTF8='1'; python \"C:\\\\Users\\\\tingy\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--VibeCoding-Game-block\\\\9db466f8-36a3-40d0-a8d7-8abef1fd9c52\\\\scratchpad\\\\test_visual.py\")"
+    ]
+  }
+}

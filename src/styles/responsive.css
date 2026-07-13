@@ -1,0 +1,40 @@
+/* ═══ 響應式 ═══ */
+
+@media (max-width: 1080px) {
+  .side-left, .side-right { width: 190px; flex-basis: 190px; padding: 10px; }
+  .stat-num { font-size: 1.1rem; }
+}
+
+@media (max-width: 860px) {
+  .game-layout { flex-wrap: wrap; align-content: flex-start; gap: 8px; overflow-y: auto; }
+  .board-wrap { order: 1; width: 100%; flex: 0 0 auto; height: min(62vh, 120vw); }
+  .side-left { order: 2; }
+  .side-right { order: 3; }
+  .side-left, .side-right {
+    flex: 1 1 45%; width: auto; max-height: 30vh;
+  }
+  .reaction-log { max-height: 60px; }
+  #screen-game { overflow-y: auto; padding-bottom: 130px; }
+  .menu-footer { display: none; }
+}
+
+@media (max-width: 520px) {
+  .game-title { font-size: 1.6rem; }
+  .side-left, .side-right { flex: 1 1 100%; max-height: none; }
+  .board-wrap { height: min(58vh, 130vw); }
+  .modal-box { padding: 18px 14px; }
+  .touch-btn { width: 52px; height: 52px; }
+}
+
+/* 橫向手機：左右夾板 */
+@media (max-height: 520px) and (orientation: landscape) {
+  .game-layout { flex-wrap: nowrap; }
+  .board-wrap { order: 0; height: 96vh; }
+  .side-left, .side-right { max-height: 96vh; font-size: 0.8rem; }
+  .touch-controls { padding-bottom: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alchemy-circle { animation: none; }
+  .chain-banner { animation-duration: 0.5s; }
+}
