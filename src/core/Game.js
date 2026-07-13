@@ -2,9 +2,10 @@
 // 狀態：falling → (lock) → resolving →(連鎖循環)→ falling / won / over
 import { EventBus } from './EventBus.js';
 import { makeRng, randomSeed } from './Random.js';
-import { Board, applyStartingBlocks } from '../board/Board.js';
+import { Board, applyStartingBlocks, ensureCellUidAbove } from '../board/Board.js';
 import { PieceQueue } from '../board/PieceQueue.js';
 import { Piece } from '../board/Piece.js';
+import { SHAPE_BY_ID } from '../data/pieces.js';
 import { runPass } from '../alchemy/ReactionResolver.js';
 import { tickLockTimers } from '../alchemy/ReactionEffects.js';
 import { ScoreSystem } from '../systems/ScoreSystem.js';
@@ -22,7 +23,7 @@ import {
 } from '../config.js';
 
 export class GameSession {
-  constructor(app, mode, levelDef = null, seed = null) {
+  constructor(app, mode, levelDef = null, seed = null, resume = null) {
     this.app = app;
     this.mode = mode; // 'level' | 'endless'
     this.levelDef = levelDef;
@@ -95,6 +96,108 @@ export class GameSession {
     this.bus.on('coreCreated', () => { this.stats.cores += 1; this.audio.play('core'); });
 
     this.spawnPiece();
+    if (resume) this.applyResume(resume);
+  }
+
+  // ═══ 中途存檔：只在 falling（棋盤穩定）時可序列化 ═══
+  serialize() {
+    if (this.state !== 'falling' || !this.piece) return null;
+    const pieceData = (p) => p ? { shape: p.shape.id, cells: p.cells.map(c => ({ ...c })) } : null;
+    return {
+      mode: this.mode,
+      levelId: this.levelDef?.id ?? null,
+      rngState: this.rng.getState(),
+      board: {
+        grid: this.board.grid.map(row => row.map(cell => cell ? { ...cell } : null)),
+        lockSeq: this.board.lockSeq,
+      },
+      queue: {
+        pieces: this.queue.queue.map(pieceData),
+        bag: this.queue.bag.map(s => s.id),
+        recentElements: [...this.queue.recentElements],
+        pityStreaks: { ...this.queue.pityStreaks },
+        elements: [...this.queue.elements],
+      },
+      piece: { ...pieceData(this.piece), x: this.piece.x, y: this.piece.y, rot: this.piece.rot },
+      hold: pieceData(this.holdPiece),
+      holdUsed: this.holdUsed,
+      score: this.score.score,
+      energy: this.energy,
+      lockCount: this.lockCount,
+      elapsed: this.elapsed,
+      timeLeft: this.timeLeft,
+      endlessLevel: this.endlessLevel,
+      rerollsUsed: this.rerollsUsed,
+      corruptionCancelled: this.corruptionCancelled,
+      maxChain: this.maxChain,
+      spellsUsed: { ...this.spells.usedCounts },
+      boss: this.boss ? { hp: this.boss.hp, locks: this.boss.locksSinceAttack } : null,
+      objectives: this.objectives?.items.map(i => ({ progress: i.progress, done: i.done })) ?? null,
+      stats: JSON.parse(JSON.stringify(this.stats)),
+    };
+  }
+
+  applyResume(d) {
+    const revive = (pd) => {
+      if (!pd) return null;
+      return new Piece(SHAPE_BY_ID[pd.shape], pd.cells.map(c => ({ ...c })));
+    };
+    this.board.grid = d.board.grid.map(row => row.map(cell => cell ? { ...cell } : null));
+    this.board.lockSeq = d.board.lockSeq;
+    this.board.version += 1;
+    this.rng.setState(d.rngState);
+
+    const q = this.queue;
+    q.queue = d.queue.pieces.map(revive);
+    q.bag = d.queue.bag.map(id => SHAPE_BY_ID[id]);
+    q.recentElements = [...d.queue.recentElements];
+    q.pityStreaks = { ...d.queue.pityStreaks };
+    q.elements = [...d.queue.elements];
+
+    this.piece = revive(d.piece);
+    this.piece.x = d.piece.x;
+    this.piece.y = d.piece.y;
+    this.piece.rot = d.piece.rot;
+    this.holdPiece = revive(d.hold);
+    this.holdUsed = d.holdUsed;
+    this.score.score = d.score;
+    this.energy = d.energy;
+    this.lockCount = d.lockCount;
+    this.elapsed = d.elapsed;
+    this.timeLeft = d.timeLeft;
+    this.endlessLevel = d.endlessLevel;
+    this.rerollsUsed = d.rerollsUsed;
+    this.corruptionCancelled = d.corruptionCancelled;
+    this.maxChain = d.maxChain;
+    this.spells.usedCounts = { ...d.spellsUsed };
+    if (this.boss && d.boss) {
+      this.boss.hp = d.boss.hp;
+      this.boss.locksSinceAttack = d.boss.locks;
+    }
+    if (this.objectives && d.objectives) {
+      this.objectives.items.forEach((item, i) => {
+        if (d.objectives[i]) {
+          item.progress = d.objectives[i].progress;
+          item.done = d.objectives[i].done;
+        }
+      });
+    }
+    this.stats = JSON.parse(JSON.stringify(d.stats));
+
+    // 新格 id 不得與還原格衝突（hitGuard 以 id 去重）
+    let maxId = 0;
+    this.board.forEach((r, c, cell) => { maxId = Math.max(maxId, cell.id || 0); });
+    for (const p of [this.piece, this.holdPiece, ...q.queue]) {
+      if (p) for (const cell of p.cells) maxId = Math.max(maxId, cell.id || 0);
+    }
+    ensureCellUidAbove(maxId);
+
+    this.state = 'falling';
+    this.fallTimer = 0;
+    this.lockTimer = 0;
+    this.lockResets = 0;
+    this.bus.emit('objectivesChanged', {});
+    this.app.saveMidGame?.(this);
   }
 
   addEnergy(n) {
@@ -120,6 +223,7 @@ export class GameSession {
       return;
     }
     this.state = 'falling';
+    this.app.saveMidGame?.(this); // 每次生成新拼塊 = 穩定檢查點
   }
 
   // ── 玩家輸入 ──

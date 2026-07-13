@@ -146,6 +146,37 @@ with sync_playwright() as p:
     assert boss and final == 'won', (boss, final)
     print('boss: OK')
 
+    # ═══ 中途存檔：玩 3 塊 → 重新整理 → 繼續遊戲 → 狀態一致 ═══
+    page.click('#btn-result-menu'); page.wait_for_timeout(300)
+    page.evaluate("() => window.__eal.startLevel(3)")
+    page.wait_for_timeout(500)
+    for _ in range(3):
+        page.keyboard.press('Space')
+        wait_stable()
+    before = page.evaluate("""() => {
+        const s = window.__eal.session;
+        return { score: s.score.score, locks: s.lockCount, level: s.levelDef.id,
+                 next: s.queue.peek(3).map(p => p.shape.id),
+                 cells: s.board.count(() => true) };
+    }""")
+    page.reload(); page.wait_for_load_state('networkidle'); page.wait_for_timeout(400)
+    assert not page.locator('#btn-continue').evaluate("el => el.classList.contains('hidden')")
+    page.click('#btn-continue'); page.wait_for_timeout(500)
+    after = page.evaluate("""() => {
+        const s = window.__eal.session;
+        return { score: s.score.score, locks: s.lockCount, level: s.levelDef.id,
+                 next: s.queue.peek(3).map(p => p.shape.id),
+                 cells: s.board.count(() => true) };
+    }""")
+    assert after == before, (before, after)
+    print('mid-game resume: OK', json.dumps(after))
+
+    # 音樂開關不應報錯
+    page.evaluate("() => window.__eal.setSetting('music', true)")
+    page.wait_for_timeout(800)
+    page.evaluate("() => window.__eal.setSetting('music', false)")
+    print('music toggle: OK')
+
     browser.close()
 
 print('CONSOLE ERRORS:', errors if errors else '(none)')

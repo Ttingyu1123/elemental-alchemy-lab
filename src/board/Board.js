@@ -3,6 +3,11 @@ import { COLS, TOTAL_ROWS, HIDDEN_ROWS } from '../config.js';
 
 let cellUid = 0;
 
+// 中途存檔還原後呼叫：確保新格 id 不與還原格衝突（hitGuard 以 id 去重）
+export function ensureCellUidAbove(n) {
+  if (Number.isFinite(n) && n > cellUid) cellUid = Math.ceil(n);
+}
+
 // kind: normal | ether | gold | rune | chain | rock | rock_hard | corrupt |
 //       ice(冰封,兩次) | icecrystal(冰霜產物,一擊碎) | potion | core | crystal |
 //       plant | lava | sand | tree

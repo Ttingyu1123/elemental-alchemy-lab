@@ -9,7 +9,8 @@
       "PowerShell(Set-Location d:\\\\VibeCoding\\\\Game-block; $env:PYTHONUTF8='1'; python tests\\\\e2e\\\\smoke.py)",
       "PowerShell(Set-Location d:\\\\VibeCoding\\\\Game-block; $env:PYTHONUTF8='1'; python tests\\\\e2e\\\\mechanics.py)",
       "PowerShell($env:PYTHONUTF8='1'; python \"C:\\\\Users\\\\tingy\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--VibeCoding-Game-block\\\\9db466f8-36a3-40d0-a8d7-8abef1fd9c52\\\\scratchpad\\\\shot_preview.py\")",
-      "PowerShell(Set-Location d:\\\\VibeCoding\\\\Game-block; npx vitest run 2>&1 | Select-Object -Last 6; $env:PYTHONUTF8='1'; python tests\\\\e2e\\\\smoke.py)"
+      "PowerShell(Set-Location d:\\\\VibeCoding\\\\Game-block; npx vitest run 2>&1 | Select-Object -Last 6; $env:PYTHONUTF8='1'; python tests\\\\e2e\\\\smoke.py)",
+      "PowerShell(Set-Location d:\\\\VibeCoding\\\\Game-block; $env:PYTHONUTF8='1'; python tests\\\\e2e\\\\smoke.py; python tests\\\\e2e\\\\mechanics.py)"
     ]
   }
 }

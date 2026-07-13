@@ -336,15 +336,24 @@ export function runPass(sess, chain) {
 
   // 8) 完整行消除（移除行內殘存格；岩石等不可消格會留下）
   if (fullRows.length) {
+    // 消除前快照，供溶解動畫使用（只溶解真的被移除的格）
+    const snapshot = [];
+    for (const r of fullRows) {
+      for (let c = 0; c < board.cols; c++) {
+        const cell = board.get(r, c);
+        if (cell) snapshot.push({ r, c, cell });
+      }
+    }
     for (const r of fullRows) {
       for (let c = 0; c < board.cols; c++) hitCell(sess, r, c, ctx, 'line');
     }
+    const removed = snapshot.filter(({ r, c, cell }) => board.get(r, c) !== cell);
     const lineScore = Math.round((LINE_SCORES[Math.min(fullRows.length, 4)] +
       Math.max(0, fullRows.length - 4) * 400) * mult);
     sess.score.addRaw(lineScore);
     sess.addEnergy(ENERGY_LINE * fullRows.length);
     sess.bus.emit('lines', { count: fullRows.length, rows: fullRows, chain, score: lineScore });
-    sess.fx?.lineFx(fullRows, lineScore);
+    sess.fx?.lineFx(fullRows, lineScore, removed);
     acted = true;
   }
 

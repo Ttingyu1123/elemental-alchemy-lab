@@ -21,12 +21,14 @@ export class HUD {
     };
     this.spellButtons = {};
     this.unsubs = [];
+    this.previewSig = null;
     this.els.reroll.addEventListener('click', () => this.onReroll());
   }
 
   bindSession(sess) {
     for (const off of this.unsubs) off();
     this.unsubs = [];
+    this.previewSig = null;
     this.els.log.innerHTML = '';
     this.buildSpellPanel(sess);
     this.rebuildObjectives(sess);
@@ -154,14 +156,18 @@ export class HUD {
 
     if (sess.mode === 'endless') e.speed.textContent = String(sess.endlessLevel);
 
-    // 預覽
+    // 預覽（dirty flag：佇列或暫存變動才重繪）
     const nexts = sess.queue.peek(3);
-    const nc = this.els.next;
-    nc.getContext('2d').clearRect(0, 0, nc.width, nc.height);
-    nexts.forEach((p, i) => drawPiecePreview(nc, p, i, 3));
-    const hc = this.els.hold;
-    hc.getContext('2d').clearRect(0, 0, hc.width, hc.height);
-    if (sess.holdPiece) drawPiecePreview(hc, sess.holdPiece, 0, 1);
+    const sig = nexts.map(p => p.cells[0]?.id ?? 0).join(',') + '|' + (sess.holdPiece?.cells[0]?.id ?? '');
+    if (sig !== this.previewSig) {
+      this.previewSig = sig;
+      const nc = this.els.next;
+      nc.getContext('2d').clearRect(0, 0, nc.width, nc.height);
+      nexts.forEach((p, i) => drawPiecePreview(nc, p, i, 3));
+      const hc = this.els.hold;
+      hc.getContext('2d').clearRect(0, 0, hc.width, hc.height);
+      if (sess.holdPiece) drawPiecePreview(hc, sess.holdPiece, 0, 1);
+    }
 
     this.updateReroll(sess);
   }

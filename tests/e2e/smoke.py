@@ -74,6 +74,8 @@ with sync_playwright() as p:
     save = page.evaluate("() => JSON.parse(localStorage.getItem('eal_save') || 'null')")
     assert save is not None
     print('save discovered reactions:', list(save['discoveredReactions'].keys()))
+    assert 'first_reaction' in save.get('achievements', {}), 'achievement should unlock'
+    print('achievement first_reaction: OK')
 
     # 無限模式
     page.keyboard.press('p'); page.wait_for_timeout(200)

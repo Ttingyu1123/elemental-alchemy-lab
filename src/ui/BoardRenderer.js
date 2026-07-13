@@ -274,6 +274,7 @@ export class BoardRenderer {
     this.shake = 0;
     this.pvSig = null;      // 反應預覽快取（盤面版本＋拼塊姿態）
     this.pvData = [];
+    this.dissolves = [];    // 消行溶解殘影（純視覺，資料已即時移除）
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -383,11 +384,18 @@ export class BoardRenderer {
     this.floatText(first.r, first.c, `共鳴 ×${group.cells.length} +${bonus}`, el.color);
   }
 
-  lineFx(rows, score) {
+  lineFx(rows, score, removed = []) {
     for (const r of rows) {
       for (let c = 0; c < COLS; c++) this.flash(r, c, '#ffffff');
     }
+    for (const { r, c, cell } of removed) {
+      this.dissolves.push({ r, c, cell, t: 0, dur: 0.32 });
+    }
+    for (const r of rows) {
+      this.burst(r, 2 + Math.floor(Math.random() * 6), '#e8c26a', 6);
+    }
     if (rows.length >= 2) this.floatText(rows[0], 4, `+${score}`, '#e8c26a');
+    if (rows.length >= 3) this.shake = Math.max(this.shake, 0.28);
   }
 
   bossHitFx(dmg, src) {
@@ -465,6 +473,23 @@ export class BoardRenderer {
         if (r >= HIDDEN_ROWS - 1) drawCell(g, cell, c * s, (r - HIDDEN_ROWS) * s, s);
       }
     }
+
+    // 消行溶解殘影（縮小＋淡出）
+    for (const d2 of this.dissolves) {
+      d2.t += dt / 1000;
+      if (d2.r < HIDDEN_ROWS) continue;
+      const k = Math.max(0.01, 1 - d2.t / d2.dur);
+      const cx = (d2.c + 0.5) * s;
+      const cy = (d2.r - HIDDEN_ROWS + 0.5) * s;
+      g.save();
+      g.translate(cx, cy);
+      g.scale(k, k);
+      g.globalAlpha = k;
+      drawCell(g, d2.cell, -s / 2, -s / 2, s);
+      g.restore();
+    }
+    g.globalAlpha = 1;
+    this.dissolves = this.dissolves.filter(d2 => d2.t < d2.dur);
 
     // 閃光層
     for (const f of this.flashes) {
@@ -561,6 +586,7 @@ export class BoardRenderer {
     this.particles = [];
     this.floats = [];
     this.flashes = [];
+    this.dissolves = [];
     this.shake = 0;
     this.pvSig = null;
     this.pvData = [];

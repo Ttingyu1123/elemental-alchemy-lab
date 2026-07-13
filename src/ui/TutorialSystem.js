@@ -34,11 +34,11 @@ export class TutorialSystem {
     return sess.mode === 'level' && sess.levelDef.tutorial && !this.save.data.tutorialCompleted;
   }
 
-  attach(sess) {
+  attach(sess, startStep = 0) {
     this.detach();
     if (!this.shouldRun(sess)) return;
     this.active = true;
-    this.step = 0;
+    this.step = Math.min(Math.max(startStep ?? 0, 0), STEPS.length - 1);
     this.unsubs.push(sess.bus.on('playerAction', (a) => this.onEvent('playerAction', a)));
     this.unsubs.push(sess.bus.on('lines', (p) => this.onEvent('lines', p)));
     this.unsubs.push(sess.bus.on('reaction', (p) => this.onEvent('reaction', p)));

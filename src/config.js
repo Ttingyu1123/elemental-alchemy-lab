@@ -53,4 +53,4 @@ export const MAX_PARTICLES = 320;
 
 // 存檔
 export const SAVE_KEY = 'eal_save';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2; // v2：midGame 中途存檔＋achievementProgress

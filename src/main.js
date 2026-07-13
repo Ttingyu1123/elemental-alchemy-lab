@@ -7,6 +7,7 @@ import { REACTION_BY_ID } from './data/reactions.js';
 import { SaveSystem } from './systems/SaveSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
 import { InputSystem } from './systems/InputSystem.js';
+import { AchievementSystem } from './systems/AchievementSystem.js';
 import { BoardRenderer } from './ui/BoardRenderer.js';
 import { HUD } from './ui/HUD.js';
 import { Screens } from './ui/Screens.js';
@@ -22,6 +23,10 @@ class App {
     this.hud = new HUD((id) => this.onSpellClick(id), () => this.session?.reroll());
     this.screens = new Screens(this);
     this.tutorial = new TutorialSystem(this.save);
+    this.achievements = new AchievementSystem(this.save, (a) => {
+      this.screens.toast(`🏆 成就解鎖：${a.icon} ${a.name}`, a.description);
+      this.audio.play('discover');
+    });
 
     this.session = null;
     this.paused = false;
@@ -51,6 +56,11 @@ class App {
     window.addEventListener('pointerdown', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });
 
+    // 關頁前保底存一次中途進度（平時每次生成新拼塊已自動存）
+    window.addEventListener('beforeunload', () => {
+      if (this.session && !this.sessionEnded) this.saveMidGame(this.session);
+    });
+
     this.screens.show('menu');
     requestAnimationFrame((ts) => this.loop(ts));
   }
@@ -71,22 +81,31 @@ class App {
   }
 
   // ── session 生命週期 ──
-  beginSession(mode, levelDef) {
+  beginSession(mode, levelDef, resume = null) {
     this.endSessionObject();
     this.paused = false;
     this.sessionEnded = false;
     this.renderer.clearFx();
     this.input.reset();
-    this.session = new GameSession(this, mode, levelDef);
+    this.session = new GameSession(this, mode, levelDef, null, resume);
     this.hud.bindSession(this.session);
-    this.tutorial.attach(this.session);
+    this.tutorial.attach(this.session, resume?.tutorialStep ?? 0);
     this.bindSessionEvents(this.session);
+    this.achievements.bindSession(this.session);
     this.screens.show('game');
     this.renderer.resize();
     if (levelDef) {
       for (const el of levelDef.availableElements) this.save.discoverElement(el);
     }
     this.sessionStart = performance.now();
+  }
+
+  // GameSession 於每次生成新拼塊時呼叫（穩定檢查點）
+  saveMidGame(sess) {
+    const snapshot = sess.serialize();
+    if (!snapshot) return; // 非穩定狀態 → 保留上一個檢查點
+    snapshot.tutorialStep = this.tutorial.active ? this.tutorial.step : null;
+    this.save.setMidGame(snapshot);
   }
 
   bindSessionEvents(sess) {
@@ -119,6 +138,14 @@ class App {
   }
 
   continueGame() {
+    const mg = this.save.data.midGame;
+    if (mg) {
+      const lv = mg.levelId ? LEVEL_BY_ID[mg.levelId] : null;
+      if (mg.mode === 'endless' || lv) {
+        this.beginSession(mg.mode, lv, mg);
+        return;
+      }
+    }
     const id = Math.min(this.save.data.currentLevel, this.save.data.unlockedLevels, 12);
     this.startLevel(id);
   }
@@ -175,12 +202,14 @@ class App {
     this.input.reset();
     this.screens.hideTargetHint();
     this.recordPlaytime();
+    this.save.clearMidGame(); // 結算後不可續玩該局
 
     if (sess.mode === 'level') {
       const lv = sess.levelDef;
       if (won) {
         const stars = starsFor(lv, sess.score.score);
         this.save.completeLevel(lv.id, stars, sess.score.score);
+        this.achievements.onLevelComplete();
         const offerDue = RELIC_OFFER_AFTER_LEVELS.includes(lv.id) &&
           !this.save.data.relicOffersDone.includes(lv.id);
         const unowned = RELICS.map(r => r.id).filter(id => !this.save.data.ownedRelics.includes(id));
@@ -205,6 +234,7 @@ class App {
         score: sess.score.score, maxChain: sess.maxChain,
         timeSec: sess.elapsed / 1000, reactions: sess.stats.reactions, quads: sess.stats.quads,
       });
+      this.achievements.onEndlessEnd(sess.score.score);
       this.showEndlessResult(sess);
     }
   }

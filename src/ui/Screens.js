@@ -3,6 +3,7 @@ import { LEVELS } from '../data/levels.js';
 import { ELEMENTS } from '../data/elements.js';
 import { ALL_REACTIONS, RESONANCE_INFO, CORE_INFO } from '../data/reactions.js';
 import { RELICS, RELIC_BY_ID } from '../data/relics.js';
+import { ACHIEVEMENTS } from '../data/achievements.js';
 import { drawElementIcon } from './BoardRenderer.js';
 
 const $ = (id) => document.getElementById(id);
@@ -29,6 +30,7 @@ export class Screens {
     // 圖鑑 tabs
     $('tab-elements').addEventListener('click', () => this.buildCodex('elements'));
     $('tab-reactions').addEventListener('click', () => this.buildCodex('reactions'));
+    $('tab-achievements').addEventListener('click', () => this.buildCodex('achievements'));
 
     // 設定
     $('set-sfx').addEventListener('change', (e) => app.setSetting('sfx', e.target.checked));
@@ -73,8 +75,10 @@ export class Screens {
 
   syncMenu() {
     const d = this.app.save.data;
-    const hasProgress = d.unlockedLevels > 1 || Object.keys(d.levelStars).length > 0;
-    $('btn-continue').classList.toggle('hidden', !hasProgress);
+    const hasProgress = d.midGame || d.unlockedLevels > 1 || Object.keys(d.levelStars).length > 0;
+    const btn = $('btn-continue');
+    btn.classList.toggle('hidden', !hasProgress);
+    btn.textContent = d.midGame ? '繼續遊戲（進行中）' : '繼續遊戲';
   }
 
   syncSettings() {
@@ -114,9 +118,29 @@ export class Screens {
   buildCodex(tab) {
     $('tab-elements').classList.toggle('active', tab === 'elements');
     $('tab-reactions').classList.toggle('active', tab === 'reactions');
+    $('tab-achievements').classList.toggle('active', tab === 'achievements');
     const wrap = $('codex-content');
     wrap.innerHTML = '';
     const d = this.app.save.data;
+
+    if (tab === 'achievements') {
+      for (const a of ACHIEVEMENTS) {
+        const unlockedAt = d.achievements[a.id];
+        const card = document.createElement('div');
+        card.className = 'codex-card' + (unlockedAt ? '' : ' undiscovered');
+        const icon = document.createElement('div');
+        icon.className = 'codex-icon';
+        icon.style.background = unlockedAt ? 'rgba(232,194,106,0.25)' : '#333';
+        icon.textContent = unlockedAt ? a.icon : '🔒';
+        const info = document.createElement('div');
+        info.innerHTML = `<h4>${a.name}</h4><p>${a.description}</p>` +
+          (unlockedAt ? `<div class="codex-meta">解鎖於 ${new Date(unlockedAt).toLocaleDateString()}</div>` : '');
+        card.appendChild(icon);
+        card.appendChild(info);
+        wrap.appendChild(card);
+      }
+      return;
+    }
 
     if (tab === 'elements') {
       for (const el of Object.values(ELEMENTS)) {

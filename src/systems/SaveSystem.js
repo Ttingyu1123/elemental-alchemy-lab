@@ -17,16 +17,19 @@ function defaultSave() {
     tutorialCompleted: false,
     settings: { sfx: true, music: false, volume: 70, reduced: false },
     achievements: {},
+    achievementProgress: { corrupt: 0, spells: 0 },
+    midGame: null,
     totalPlayTime: 0,
   };
 }
 
 function migrate(data) {
-  // 未來版本遷移點；缺欄位以預設補齊
+  // v1 → v2：補 midGame / achievementProgress；缺欄位以預設補齊
   const base = defaultSave();
   const merged = { ...base, ...data };
   merged.settings = { ...base.settings, ...(data.settings || {}) };
   merged.endless = { ...base.endless, ...(data.endless || {}) };
+  merged.achievementProgress = { ...base.achievementProgress, ...(data.achievementProgress || {}) };
   merged.saveVersion = SAVE_VERSION;
   return merged;
 }
@@ -105,5 +108,17 @@ export class SaveSystem {
   setSetting(k, v) {
     this.data.settings[k] = v;
     this.save();
+  }
+
+  setMidGame(snapshot) {
+    this.data.midGame = snapshot;
+    this.save();
+  }
+
+  clearMidGame() {
+    if (this.data.midGame !== null) {
+      this.data.midGame = null;
+      this.save();
+    }
   }
 }

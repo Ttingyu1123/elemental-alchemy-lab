@@ -4,7 +4,9 @@ export class AudioSystem {
     this.settings = settings; // 直接引用 save.data.settings
     this.ctx = null;
     this.master = null;
-    this.musicNodes = null;
+    this.musicGain = null;
+    this.musicTimer = null;
+    this.musicState = null;
   }
 
   ensure() {
@@ -92,33 +94,85 @@ export class AudioSystem {
     }
   }
 
+  // ═══ 生成式背景音樂：Am–F–C–G 循環，pad＋bass＋琶音＋星塵閃音 ═══
+  // 單一 lookahead 排程器（Web Audio 標準模式）；關閉時計時器與節點全數清除
   setMusic(on) {
-    if (on) {
-      if (!this.ensure()) return;
-      this.resume();
-      if (this.musicNodes) return;
-      // 簡單雙振盪器 pad 循環
-      const g = this.ctx.createGain();
-      g.gain.value = 0.05;
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 600;
-      const o1 = this.ctx.createOscillator();
-      const o2 = this.ctx.createOscillator();
-      o1.type = 'sawtooth'; o2.type = 'sawtooth';
-      o1.frequency.value = 110; o2.frequency.value = 110.7;
-      const lfo = this.ctx.createOscillator();
-      const lfoGain = this.ctx.createGain();
-      lfo.frequency.value = 0.08;
-      lfoGain.gain.value = 200;
-      lfo.connect(lfoGain).connect(filter.frequency);
-      o1.connect(filter); o2.connect(filter);
-      filter.connect(g).connect(this.master);
-      o1.start(); o2.start(); lfo.start();
-      this.musicNodes = [o1, o2, lfo];
-    } else if (this.musicNodes) {
-      for (const n of this.musicNodes) { try { n.stop(); } catch { /* noop */ } }
-      this.musicNodes = null;
+    if (!on) { this.stopMusic(); return; }
+    if (!this.ensure()) return;
+    this.resume();
+    if (this.musicTimer) return;
+    this.musicGain = this.ctx.createGain();
+    this.musicGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+    this.musicGain.gain.exponentialRampToValueAtTime(0.16, this.ctx.currentTime + 1.5);
+    this.musicGain.connect(this.master);
+    this.musicState = { step: 0, nextTime: this.ctx.currentTime + 0.1 };
+    this.musicTimer = setInterval(() => this.scheduleMusic(), 120);
+  }
+
+  stopMusic() {
+    if (this.musicTimer) {
+      clearInterval(this.musicTimer);
+      this.musicTimer = null;
+    }
+    if (this.musicGain) {
+      const g = this.musicGain;
+      this.musicGain = null;
+      try {
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.4);
+        setTimeout(() => { try { g.disconnect(); } catch { /* noop */ } }, 600);
+      } catch { /* noop */ }
+    }
+    this.musicState = null;
+  }
+
+  scheduleMusic() {
+    if (!this.musicState || !this.musicGain) return;
+    const STEP_DUR = 0.36; // ≈83 BPM 的八分音符
+    const s = this.musicState;
+    while (s.nextTime < this.ctx.currentTime + 0.5) {
+      this.playMusicStep(s.step, s.nextTime, STEP_DUR);
+      s.step = (s.step + 1) % 32; // 4 小節 × 8 步
+      s.nextTime += STEP_DUR;
+    }
+  }
+
+  static CHORDS = [
+    { root: 110.00, tones: [220.00, 261.63, 329.63] }, // Am
+    { root: 87.31, tones: [174.61, 220.00, 261.63] },  // F
+    { root: 130.81, tones: [196.00, 261.63, 329.63] }, // C
+    { root: 98.00, tones: [196.00, 246.94, 293.66] },  // G
+  ];
+  static ARP_PATTERN = [0, 1, 2, 1, 0, 2, 1, 2];
+
+  musicNote({ freq, type = 'triangle', t, dur, gain, attack = 0.01 }) {
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g).connect(this.musicGain);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  }
+
+  playMusicStep(step, t, stepDur) {
+    const chord = AudioSystem.CHORDS[Math.floor(step / 8)];
+    const sub = step % 8;
+    if (sub === 0) {
+      // 小節頭：bass＋和弦 pad
+      this.musicNote({ freq: chord.root, type: 'sine', t, dur: stepDur * 7.5, gain: 0.5, attack: 0.05 });
+      for (const tone of chord.tones) {
+        this.musicNote({ freq: tone, type: 'sawtooth', t, dur: stepDur * 7.8, gain: 0.06, attack: 1.2 });
+      }
+    }
+    // 琶音（高八度）
+    const arpTone = chord.tones[AudioSystem.ARP_PATTERN[sub]] * 2;
+    this.musicNote({ freq: arpTone, type: 'triangle', t, dur: 0.3, gain: 0.14 });
+    // 星塵閃音
+    if (Math.random() < 0.07) {
+      this.musicNote({ freq: chord.tones[2] * 4, type: 'sine', t: t + stepDur / 2, dur: 0.5, gain: 0.05, attack: 0.02 });
     }
   }
 }
