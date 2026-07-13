@@ -5,6 +5,8 @@
 
 純前端、零後端、零付費 API、所有美術與音效皆程式生成。
 
+**線上遊玩**：https://game-alchemy.tingyudeco.com/（GitHub Pages，main 分支根目錄直接服務——所有模組皆相對路徑 import，無需 build）
+
 ## 安裝與啟動
 
 ```bash
