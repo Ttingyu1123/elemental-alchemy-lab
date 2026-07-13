@@ -91,6 +91,9 @@ html, body {
 .menu-btn.danger { border-color: rgba(208, 90, 110, 0.6); color: var(--danger); }
 .menu-btn.small { font-size: 0.85rem; padding: 7px 14px; }
 .menu-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+a.menu-btn { display: block; text-align: center; text-decoration: none; }
+.manual-link { color: var(--gold); text-decoration: none; }
+.manual-link:hover { text-decoration: underline; }
 
 .menu-footer { position: absolute; bottom: 16px; color: var(--text-dim); font-size: 0.8rem; text-align: center; padding: 0 16px; }
 

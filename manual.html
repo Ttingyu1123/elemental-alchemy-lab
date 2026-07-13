@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元素煉金工坊 — 攻略說明書</title>
+<meta name="description" content="元素煉金工坊 Elemental Alchemy Lab 完整攻略：操作、17 種元素反應表、共鳴與核心、特殊方塊、法術遺物、12 關逐關攻略與 Boss 打法。">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #17142b; --panel: #221d3f; --panel2: #2a2450; --line: #3d3568;
+    --gold: #e8c26a; --ink: #efe9ff; --dim: #a89fd0;
+    --fire: #e8593a; --water: #3d7de8; --earth: #a4713a; --air: #4fc9b8;
+    --light: #e9c95a; --shadow: #8a6fd0; --danger: #d05a6e; --good: #7fd98a;
+  }
+  html, body { background: radial-gradient(ellipse at 50% 0%, #241e45 0%, var(--bg) 60%); color: var(--ink);
+    font-family: "Microsoft JhengHei","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+    line-height: 1.8; font-size: 16px; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px 90px; }
+  header.top { text-align: center; padding: 24px 0 8px; }
+  header.top h1 { color: var(--gold); font-size: 34px; letter-spacing: 5px;
+    text-shadow: 0 0 18px rgba(232,194,106,.35); }
+  header.top .sub { color: var(--dim); font-size: 14px; letter-spacing: 3px; margin-top: 6px; }
+  header.top .play { display: inline-block; margin-top: 18px; padding: 11px 30px; border-radius: 10px;
+    background: var(--gold); color: #201a3c; font-weight: 700; text-decoration: none; letter-spacing: 2px; }
+  header.top .play:hover { filter: brightness(1.08); }
+  .toc { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 22px; margin: 26px 0; }
+  .toc h2 { font-size: 15px; color: var(--dim); letter-spacing: 2px; margin-bottom: 8px; }
+  .toc ol { columns: 2; column-gap: 30px; list-style: none; counter-reset: t; }
+  .toc li { counter-increment: t; padding: 3px 0; break-inside: avoid; }
+  .toc li::before { content: counter(t) "."; color: var(--gold); font-weight: 700; margin-right: 8px; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc a:hover { color: var(--gold); }
+  section { margin: 38px 0; }
+  h2.sec { font-size: 23px; color: var(--gold); border-left: 4px solid var(--gold);
+    padding-left: 12px; margin-bottom: 14px; letter-spacing: 2px; }
+  h3 { font-size: 17px; color: #d8c8ff; margin: 20px 0 6px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 4px; padding-left: 24px; }
+  li { margin: 5px 0; }
+  strong { color: #fff; }
+  em { color: var(--gold); font-style: normal; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 20px; margin: 14px 0; }
+  .tip { border-left: 4px solid var(--good); }
+  .warn { border-left: 4px solid var(--danger); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px;
+    display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--panel2); color: var(--gold); white-space: nowrap; }
+  td { background: rgba(34,29,63,.55); }
+  kbd { background: #33305c; border: 1px solid #4d4880; border-radius: 5px;
+    padding: 1px 7px; font-size: .85em; white-space: nowrap; }
+  .el { display: inline-block; padding: 1px 9px; border-radius: 6px; font-weight: 700;
+    color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6); font-size: .92em; white-space: nowrap; }
+  .el.fire { background: var(--fire); } .el.water { background: var(--water); }
+  .el.earth { background: var(--earth); } .el.air { background: var(--air); }
+  .el.light { background: var(--light); color: #4a3a10; text-shadow: none; }
+  .el.shadow { background: var(--shadow); }
+  .rx { color: var(--gold); font-weight: 700; white-space: nowrap; }
+  footer { text-align: center; color: var(--dim); font-size: 13px; margin-top: 60px;
+    border-top: 1px solid var(--line); padding-top: 24px; }
+  footer a { color: var(--gold); }
+  .backtop { position: fixed; right: 18px; bottom: 18px; background: var(--panel2);
+    border: 1px solid var(--line); color: var(--gold); border-radius: 50%;
+    width: 44px; height: 44px; display: grid; place-items: center; text-decoration: none; font-size: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+
+<header class="top">
+  <h1>✦ 元素煉金工坊 ✦</h1>
+  <div class="sub">ELEMENTAL ALCHEMY LAB — 攻略說明書</div>
+  <a class="play" href="./" aria-label="開始遊玩">▶ 開始遊玩</a>
+</header>
+
+<nav class="toc" aria-label="目錄">
+  <h2>目 錄</h2>
+  <ol>
+    <li><a href="#intro">遊戲簡介與核心循環</a></li>
+    <li><a href="#controls">操作方式</a></li>
+    <li><a href="#stability">最重要的規則：化合物穩定性</a></li>
+    <li><a href="#elements">六大元素</a></li>
+    <li><a href="#pairs">雙元素反應表（12 種）</a></li>
+    <li><a href="#triples">三元素高階反應（5 種）</a></li>
+    <li><a href="#resonance">共鳴與元素核心</a></li>
+    <li><a href="#specials">特殊方塊圖鑑</a></li>
+    <li><a href="#scoring">連鎖與計分</a></li>
+    <li><a href="#spells">煉金能量與法術</a></li>
+    <li><a href="#relics">遺物一覽</a></li>
+    <li><a href="#levels">12 關逐關攻略</a></li>
+    <li><a href="#boss">Boss：腐化煉金魔像</a></li>
+    <li><a href="#endless">無限模式</a></li>
+    <li><a href="#faq">常見問題與進階技巧</a></li>
+  </ol>
+</nav>
+
+<section id="intro">
+  <h2 class="sec">遊戲簡介與核心循環</h2>
+  <p>《元素煉金工坊》是落塊益智與元素合成的混血：拼塊照舊下落、移動、旋轉、消行，但每一格都含有一種<strong>煉金元素</strong>。當不同元素在棋盤上相鄰，就會發生反應——蒸氣上衝、藤蔓蔓生、雷電劈落、光暗湮滅。消行給你穩定的基本盤，<em>反應與連鎖才是大分數的來源</em>。</p>
+  <div class="card">
+    <p><strong>一回合的流程：</strong>拼塊落下 → 你移動與旋轉（幽靈落點會<em>預告即將觸發的反應</em>）→ 鎖定 → 檢查完整行與元素反應 → 執行反應、方塊下落 → 若引發新反應則連鎖繼續 → 獲得分數與煉金能量 → 下一塊。</p>
+  </div>
+  <p>關卡模式共 12 關（含教學與 Boss 戰），另有速度不斷提升的無限模式。過關獲得星級，第 3、6、9 關後可三選一拿遺物。</p>
+</section>
+
+<section id="controls">
+  <h2 class="sec">操作方式</h2>
+  <table>
+    <thead><tr><th>按鍵</th><th>動作</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd> 或 <kbd>A</kbd> <kbd>D</kbd></td><td>左右移動（按住可連續移動）</td></tr>
+      <tr><td><kbd>↑</kbd> 或 <kbd>W</kbd></td><td>順時針旋轉（貼牆會自動微調位置）</td></tr>
+      <tr><td><kbd>Z</kbd></td><td>逆時針旋轉</td></tr>
+      <tr><td><kbd>↓</kbd> 或 <kbd>S</kbd></td><td>加速下落</td></tr>
+      <tr><td><kbd>Space</kbd></td><td>瞬間落下並立即鎖定</td></tr>
+      <tr><td><kbd>C</kbd></td><td>暫存拼塊（每次落塊限用一次）</td></tr>
+      <tr><td><kbd>P</kbd> / <kbd>Esc</kbd></td><td>暫停（時間與下落完全停止）</td></tr>
+      <tr><td>連鎖演出中按住 <kbd>↓</kbd> 或按 <kbd>Space</kbd></td><td><em>快轉</em>連鎖動畫</td></tr>
+    </tbody>
+  </table>
+  <p>手機與平板：畫面下方自動顯示觸控按鈕（移動、旋轉、落下、暫存），橫向握持體驗較佳。</p>
+  <p>落地前有短暫的<strong>鎖定緩衝</strong>，期間仍可移動或旋轉（有限次數，無法無限拖延）。</p>
+</section>
+
+<section id="stability">
+  <h2 class="sec">最重要的規則：化合物穩定性</h2>
+  <div class="card tip">
+    <p><strong>同一個拼塊內的元素彼此「穩定」——永遠不會互相反應，也不會自體共鳴。</strong></p>
+    <p>反應只發生在「拼塊落地後，與<em>棋盤上既有方塊</em>相鄰」的時候。一塊火＋水拼塊本身是安全的化合物；把它落在場上的水旁邊，火那一格才會炸出蒸氣。</p>
+  </div>
+  <p>這條規則是所有策略的根基：</p>
+  <ul>
+    <li><strong>拼塊本身是安全磚</strong> —— 想墊高、想補行，就用拼塊自己的格子去填，內部怎麼混色都不會炸。</li>
+    <li><strong>反應由你主動觸發</strong> —— 落點決定一切。想反應就貼上去，不想反應就避開異元素接觸面。</li>
+    <li><strong>純元素拼塊不會自爆</strong> —— 四格同元素的拼塊落地不觸發共鳴，直到外來的同元素貼上來湊滿群組。</li>
+    <li>法術轉化或反應生成的新格子視為<em>新化合物</em>，不受原拼塊穩定性保護。</li>
+  </ul>
+  <div class="card">
+    <p><strong>反應預覽：</strong>幽靈落點若會觸發反應，相關格子會出現<em>該反應顏色的脈動外框</em>；會湊成共鳴的格子則是<em>白色虛線框</em>。落子前看一眼外框，就知道這一手會發生什麼。</p>
+  </div>
+</section>
+
+<section id="elements">
+  <h2 class="sec">六大元素</h2>
+  <table>
+    <thead><tr><th>元素</th><th>圖示</th><th>特性</th><th>登場</th></tr></thead>
+    <tbody>
+      <tr><td><span class="el fire">火 Fire</span></td><td>▲ 三角火焰</td><td>燃燒、爆炸、擴散傷害</td><td>第 1 關</td></tr>
+      <tr><td><span class="el water">水 Water</span></td><td>● 水滴</td><td>冷卻、蒸氣、淨化</td><td>第 1 關</td></tr>
+      <tr><td><span class="el earth">土 Earth</span></td><td>◆ 菱形晶體</td><td>岩石、植物、結晶</td><td>第 3 關</td></tr>
+      <tr><td><span class="el air">風 Air</span></td><td>≋ 三道氣流</td><td>擴散、推動、雷電</td><td>第 4 關</td></tr>
+      <tr><td><span class="el light">光 Light</span></td><td>✦ 四芒星</td><td>淨化、增幅、清除暗屬</td><td>第 7 關</td></tr>
+      <tr><td><span class="el shadow">暗 Shadow</span></td><td>☾ 新月</td><td>腐蝕、吞噬、高風險高報酬</td><td>第 8 關</td></tr>
+    </tbody>
+  </table>
+  <p>每個元素同時以<strong>顏色＋圖示</strong>雙重標示，色覺辨識友善。</p>
+</section>
+
+<section id="pairs">
+  <h2 class="sec">雙元素反應表（12 種）</h2>
+  <p>上下左右相鄰即觸發（不含斜角）。同一格每個階段只會參與一個反應，高優先反應先佔格子。</p>
+  <table>
+    <thead><tr><th>組合</th><th>反應</th><th>效果</th><th>策略註記</th></tr></thead>
+    <tbody>
+      <tr><td><span class="el fire">火</span>＋<span class="el water">水</span></td><td class="rx">蒸氣</td><td>清除反應格＋各自正上方最多 2 格（岩石會擋住）</td><td>最常用的除雜工具；上方是空的還有額外分</td></tr>
+      <tr><td><span class="el water">水</span>＋<span class="el earth">土</span></td><td class="rx">生長</td><td>生成植物並各蔓延一格；<em>下一階段</em>3 株以上相連整群綻放</td><td>自帶 2 連鎖；綻放給大分與能量</td></tr>
+      <tr><td><span class="el fire">火</span>＋<span class="el air">風</span></td><td class="rx">火焰風暴</td><td>十字方向各延伸 2 格清除，遇岩石停止</td><td>清十字範圍利器，能波及符文、藥劑引發連環</td></tr>
+      <tr><td><span class="el earth">土</span>＋<span class="el air">風</span></td><td class="rx">沙暴</td><td>推動同一橫行的方塊一格（往空位多的方向）；推不動則凝為沙塵</td><td>整行重排，能把異元素推到相鄰觸發新反應</td></tr>
+      <tr><td><span class="el fire">火</span>＋<span class="el earth">土</span></td><td class="rx">熔岩</td><td>反應格化為熔岩，每個反應階段熔化正下方一格，最多 3 次</td><td>定向鑽地，挖穿岩石與深埋的垃圾格</td></tr>
+      <tr><td><span class="el water">水</span>＋<span class="el air">風</span></td><td class="rx">冰霜</td><td>周圍最多 4 個普通方塊化為冰晶；冰晶被任何反應波及即粉碎加分</td><td>先鋪冰晶、再用爆炸類收割，分數翻倍</td></tr>
+      <tr><td><span class="el earth">土</span>＋<span class="el light">光</span></td><td class="rx">生命晶石</td><td>凝成晶石；晶石被消除時回復大量煉金能量（+18）</td><td>能量引擎，法術流必蹭</td></tr>
+      <tr><td><span class="el water">水</span>＋<span class="el light">光</span></td><td class="rx">聖泉</td><td>淨化半徑 3 內所有暗元素與腐蝕；無目標則 +15 能量</td><td>解腐蝕的主力；沒腐蝕時當能量電池</td></tr>
+      <tr><td><span class="el air">風</span>＋<span class="el light">光</span></td><td class="rx">雷電</td><td>劈碎堆疊最高的至多 3 格</td><td>「削塔」專用，救場神技</td></tr>
+      <tr><td><span class="el fire">火</span>＋<span class="el shadow">暗</span></td><td class="rx">詛咒火焰</td><td>5×5 大範圍爆炸，但殘留 1–2 個腐蝕方塊</td><td>高收益高風險；先確保手上有光系解法</td></tr>
+      <tr><td><span class="el earth">土</span>＋<span class="el shadow">暗</span></td><td class="rx">腐蝕</td><td>附近最多 3 格普通元素轉為暗元素</td><td>鋪暗棋：轉出來的暗元素之後配光打湮滅</td></tr>
+      <tr><td><span class="el light">光</span>＋<span class="el shadow">暗</span></td><td class="rx" style="color:#c9a7ff">虛空淨化 ★</td><td><strong>清除反應所在的整行＋整列</strong></td><td>全遊戲最強反應、最高優先；Boss 戰核心傷害</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="triples">
+  <h2 class="sec">三元素高階反應（5 種）</h2>
+  <p>三種指定元素在一點相鄰（中心格＋兩個方向的鄰格）即觸發，<strong>優先於所有雙元素反應</strong>搶佔格子。視覺與音效都有專屬演出。</p>
+  <table>
+    <thead><tr><th>組合</th><th>反應</th><th>效果</th></tr></thead>
+    <tbody>
+      <tr><td><span class="el fire">火</span><span class="el water">水</span><span class="el air">風</span></td><td class="rx">超熱蒸氣</td><td>清除中心上方 5 列寬的整片區域——堆太高時的滅火器</td></tr>
+      <tr><td><span class="el water">水</span><span class="el earth">土</span><span class="el light">光</span></td><td class="rx">世界樹</td><td>種下樹芽，每次落塊給分，3 次落塊後 5×5 大清除</td></tr>
+      <tr><td><span class="el fire">火</span><span class="el earth">土</span><span class="el shadow">暗</span></td><td class="rx">火山災變</td><td>清除棋盤最下兩行，殘留 2 顆岩石</td></tr>
+      <tr><td><span class="el water">水</span><span class="el air">風</span><span class="el light">光</span></td><td class="rx">極光風暴</td><td>統計中心附近最多的元素，<strong>全棋盤清除該元素</strong></td></tr>
+      <tr><td><span class="el earth">土</span><span class="el air">風</span><span class="el shadow">暗</span></td><td class="rx">荒蕪</td><td>4 格化為倒數沙塵；期限內清掉有高額淨化分，逾期變岩石</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="resonance">
+  <h2 class="sec">共鳴與元素核心</h2>
+  <p><strong>4 個以上同元素上下左右相連</strong>即共鳴消除（記住：單一拼塊自身的 4 連不算，要有跨拼塊的組合）。</p>
+  <table>
+    <thead><tr><th>群組大小</th><th>效果</th></tr></thead>
+    <tbody>
+      <tr><td>4 個</td><td>清除整個群組</td></tr>
+      <tr><td>5–6 個</td><td>清除＋生成一顆<strong>元素核心</strong>（+8 能量）</td></tr>
+      <tr><td>7 個以上</td><td>清除＋生成<strong>強化核心</strong>（金框，效果加倍）</td></tr>
+    </tbody>
+  </table>
+  <h3>元素核心效果（被消行、反應波及或法術命中時引爆）</h3>
+  <table>
+    <thead><tr><th>核心</th><th>效果</th><th>強化版</th></tr></thead>
+    <tbody>
+      <tr><td><span class="el fire">火焰核心</span></td><td>爆炸周圍 3×3</td><td>5×5</td></tr>
+      <tr><td><span class="el water">水流核心</span></td><td>清除同一直列</td><td>直列＋橫行</td></tr>
+      <tr><td><span class="el earth">大地核心</span></td><td>清除同一橫行</td><td>橫行＋直列</td></tr>
+      <tr><td><span class="el air">風暴核心</span></td><td>隨機清除 6 格</td><td>10 格</td></tr>
+      <tr><td><span class="el light">光明核心</span></td><td>清除所有暗元素與腐蝕</td><td>同左</td></tr>
+      <tr><td><span class="el shadow">暗影核心</span></td><td>吞噬一種隨機元素的所有方塊</td><td>兩種元素</td></tr>
+    </tbody>
+  </table>
+  <div class="card tip"><p><strong>核心是存款：</strong>核心不會自己消失，把它埋在計畫中的消行裡，或用賢者之錘精準引爆，時機由你掌控。</p></div>
+</section>
+
+<section id="specials">
+  <h2 class="sec">特殊方塊圖鑑</h2>
+  <table>
+    <thead><tr><th>方塊</th><th>行為</th><th>對策</th></tr></thead>
+    <tbody>
+      <tr><td>✳ 萬能元素（乙太）</td><td>可替代任一元素參與反應（每個反應限一顆，不能單獨成反應）</td><td>貼<span class="el light">光</span>或<span class="el shadow">暗</span>必出「虛空淨化」——因為它永遠湊最高優先的反應</td></tr>
+      <tr><td>◉ 炸裂符文</td><td>被消除或反應命中時爆炸 3×3</td><td>埋進消行或用反應波及，引發連環爆</td></tr>
+      <tr><td>⛓ 鎖鏈方塊</td><td>不參與反應，需被命中兩次才移除</td><td>消行、反應波及、賢者之錘都算一次命中</td></tr>
+      <tr><td>▦ 岩石障礙</td><td>不含元素；消行清不掉，只有爆炸、熔岩、賢者之錘（或虛空淨化）能摧毀；深色硬岩不可破壞</td><td>火焰風暴會被岩石擋住——用熔岩往下鑽，或大地護符遺物</td></tr>
+      <tr><td>☣ 腐蝕方塊</td><td>每 5 次落塊向鄰近擴散（每次最多 3 格）</td><td>聖泉、光明核心、虛空淨化、爆炸、賢者之錘可清；愈早處理愈好</td></tr>
+      <tr><td>❄ 冰封方塊</td><td>內含元素；第一次命中破冰露出元素，第二次才消除</td><td>破冰後元素即可正常反應，等於延遲資源</td></tr>
+      <tr><td>⚗ 不穩定藥劑</td><td>顯示倒數，歸零自動爆炸 3×3</td><td><em>提前</em>用反應引爆有額外獎勵分；別讓它在你的行堆下面自爆</td></tr>
+      <tr><td>◈ 金色元素</td><td>正常參與反應；被清除時 +60 分＋3 能量</td><td>優先讓它進反應而不是白白消行</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="scoring">
+  <h2 class="sec">連鎖與計分</h2>
+  <p>拼塊鎖定後的第一波反應是 <strong>Chain 1</strong>；反應或重力引發的下一波是 Chain 2，依此類推。棋盤穩定、下一塊生成時連鎖結束。</p>
+  <table>
+    <thead><tr><th>連鎖</th><th>倍率</th></tr></thead>
+    <tbody>
+      <tr><td>Chain 1</td><td>×1</td></tr>
+      <tr><td>Chain 2</td><td>×1.5</td></tr>
+      <tr><td>Chain 3</td><td>×2</td></tr>
+      <tr><td>Chain 4</td><td>×3</td></tr>
+      <tr><td>Chain 5+</td><td>每階 +0.5，上限 ×8</td></tr>
+    </tbody>
+  </table>
+  <p>消行基本分：1 行 100／2 行 300／3 行 600／4 行 1000（連鎖倍率照乘）。瞬間落下每格 +2 分，加速下落每格 +1 分。</p>
+  <div class="card tip"><p><strong>刷分核心：</strong>把反應「埋」在下層——上層清掉後方塊崩落、新的相鄰觸發下一波。倍率乘在<em>反應分、消行分、每一格的清除分</em>上，Chain 4 的一次蒸氣抵 Chain 1 的三次。</p></div>
+</section>
+
+<section id="spells">
+  <h2 class="sec">煉金能量與法術</h2>
+  <p>能量上限 100。來源：雙元素反應 +5、三元素反應 +14、共鳴 +5、核心生成 +8、生命晶石 +18、聖泉無目標 +15、金色元素 +3、<strong>每消一行 +4</strong>。</p>
+  <table>
+    <thead><tr><th>法術</th><th>消耗</th><th>效果</th><th>使用時機</th></tr></thead>
+    <tbody>
+      <tr><td>🜍 元素轉化</td><td>25</td><td>把棋盤任一格轉成指定元素</td><td>差一格就能湊反應／共鳴／消行時，最便宜的萬能鑰匙</td></tr>
+      <tr><td>🔨 賢者之錘</td><td>30</td><td>敲除一個普通方塊；對障礙方塊造成一次傷害</td><td>精準引爆核心／符文，或給鎖鏈、岩石補刀</td></tr>
+      <tr><td>🜃 重力逆轉</td><td>40</td><td>所有懸空方塊重新落下，可能觸發新反應</td><td>棋盤上有懸空結構時的免費連鎖啟動器</td></tr>
+      <tr><td>🜁 元素共鳴</td><td>50</td><td>4 個隨機普通方塊轉為同一指定元素</td><td>元素湊不齊時強制鋪場；小心隨機位置</td></tr>
+      <tr><td>🜎 賢者之石</td><td>100</td><td>清除一整行或一整列（施放時選擇）</td><td><strong>每關限一次</strong>——留給救命或 Boss 斬殺</td></tr>
+    </tbody>
+  </table>
+  <p>需要目標的法術會進入選取模式（可取消）；能量不足、暫停或結算時不可施放。</p>
+</section>
+
+<section id="relics">
+  <h2 class="sec">遺物一覽</h2>
+  <p>通過第 3、6、9 關後三選一，效果永久生效（跨關卡）。</p>
+  <table>
+    <thead><tr><th>遺物</th><th>效果</th><th>推薦度</th></tr></thead>
+    <tbody>
+      <tr><td>💍 火焰戒指</td><td>火系反應分數 +20%</td><td>火系流派穩定加成</td></tr>
+      <tr><td>🧪 潮汐瓶</td><td>水系反應額外 +5 能量</td><td>法術流首選，能量循環極快</td></tr>
+      <tr><td>🪨 大地護符</td><td>岩石可被<em>任何</em>反應波及摧毀</td><td>第 5 關與 Boss 關的岩石剋星</td></tr>
+      <tr><td>🪶 風之羽</td><td>每關可免費重抽一次「下一個」拼塊</td><td>關鍵時刻救一手</td></tr>
+      <tr><td>🪞 光明鏡</td><td>每關第一次腐蝕擴散自動取消</td><td>第 8 關後的保險</td></tr>
+      <tr><td>📖 暗影書</td><td>暗系反應分數 +30%，但詛咒火焰多殘留 1 腐蝕</td><td>高風險刷分流</td></tr>
+      <tr><td>⏳ 賢者沙漏</td><td>時限關卡時間 +30 秒</td><td>目前關卡多為步數制，優先度低</td></tr>
+      <tr><td>⚗️ 雙生坩堝</td><td>雙元素反應 12% 機率雙倍分數與能量</td><td>通用期望值加成，怎麼拿都不虧</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="levels">
+  <h2 class="sec">12 關逐關攻略</h2>
+  <table>
+    <thead><tr><th>關卡</th><th>目標</th><th>要點</th></tr></thead>
+    <tbody>
+      <tr><td>1 入門講堂</td><td>消 2 行＋600 分</td><td>只有火與水。互動教學跟著做即可；記住「同拼塊內部安全」，用整塊拼塊補行</td></tr>
+      <tr><td>2 蒸氣初啼</td><td>蒸氣 ×3</td><td>底部預鋪了間隔的水與火——把相反元素直接落在旁邊就好，看預覽外框下手</td></tr>
+      <tr><td>3 大地初醒</td><td>生長 ×2＋消 3 行</td><td>水貼土觸發生長；植物綻放本身會清格，消行請靠拼塊自身鋪穩</td></tr>
+      <tr><td>4 風起雲湧</td><td>火焰風暴 ×2＋3000 分</td><td>火風相鄰即可；十字清除順便幫你整地</td></tr>
+      <tr><td>5 頑石擋道</td><td>毀 5 岩石＋消 4 行</td><td>岩石消行清不掉！用<em>熔岩</em>（火＋土）往下鑽，或火焰風暴貼臉炸。有大地護符就輕鬆了</td></tr>
+      <tr><td>6 共鳴之歌</td><td>共鳴 ×3＋核心 ×1</td><td>刻意堆同元素：先鋪 3 個相連，再用含該元素的拼塊貼上。5 連才有核心，白虛線預覽會告訴你</td></tr>
+      <tr><td>7 輝光降臨</td><td>雷電 ×2＋聖泉 ×1</td><td>光元素登場且出現率調高。風＋光＝雷電、水＋光＝聖泉；湊不齊時系統會保底補光</td></tr>
+      <tr><td>8 暗影滋長</td><td>淨化 4 腐蝕＋6000 分</td><td>開局就有 4 顆腐蝕，<strong>每 5 塊擴散一次</strong>——優先湊水＋光聖泉洗掉，別讓它蔓延</td></tr>
+      <tr><td>9 晝夜交蝕</td><td>虛空淨化 ×1＋3 連鎖</td><td>光暗出現率大增。光暗相鄰即湮滅；連鎖靠「反應埋下層」或重力逆轉法術</td></tr>
+      <tr><td>10 三相合一</td><td>三元素反應 ×1＋8000 分</td><td>先在場上放好兩種元素相鄰的「底座」，再把第三元素落在交點。乙太可以頂替任何一角</td></tr>
+      <tr><td>11 限量委託</td><td>消 6 行＋雙元素 ×6（45 步內）</td><td>步數制！每一塊都要有產出；冰封方塊破冰後就是現成反應材料，鎖鏈交給消行順手打</td></tr>
+      <tr><td>12 腐化煉金魔像</td><td>擊敗 Boss</td><td>見下節</td></tr>
+    </tbody>
+  </table>
+  <p>星級門檻看分數：通關 1 星，高分 2–3 星。想拿 3 星就別急著完成目標——先刷連鎖再收尾。</p>
+</section>
+
+<section id="boss">
+  <h2 class="sec">Boss：腐化煉金魔像</h2>
+  <p>Boss 顯示在棋盤左側，血量 1200。<strong>每 4 次落塊施放一次技能</strong>（面板有倒數）：</p>
+  <table>
+    <thead><tr><th>階段</th><th>血量</th><th>行為</th></tr></thead>
+    <tbody>
+      <tr><td>第一階段</td><td>100–70%</td><td>散布腐蝕方塊</td></tr>
+      <tr><td>第二階段</td><td>70–40%</td><td>生成鎖鏈方塊</td></tr>
+      <tr><td>第三階段</td><td>40–20%</td><td>下落加速＋腐蝕</td></tr>
+      <tr><td>狂怒階段</td><td>&lt;20%</td><td>投擲不穩定藥劑＋更快</td></tr>
+    </tbody>
+  </table>
+  <h3>傷害表（全部乘上連鎖倍率！）</h3>
+  <table>
+    <thead><tr><th>來源</th><th>基礎傷害</th></tr></thead>
+    <tbody>
+      <tr><td>雙元素反應</td><td>22</td></tr>
+      <tr><td>三元素反應</td><td>65</td></tr>
+      <tr><td><strong>虛空淨化</strong></td><td><strong>85</strong></td></tr>
+      <tr><td>元素共鳴</td><td>15</td></tr>
+      <tr><td>核心引爆</td><td>28</td></tr>
+      <tr><td>消行（每行）</td><td>10</td></tr>
+    </tbody>
+  </table>
+  <div class="card tip">
+    <p><strong>打法：</strong>連鎖倍率乘傷害是勝負關鍵——Chain 3 的虛空淨化一發 170。光元素出現率在本關已調高，優先囤光暗組合與乙太（乙太貼光必出湮滅）。腐蝕交給聖泉順手洗，鎖鏈讓消行自然磨。賢者之石留到狂怒階段清藥劑救場。</p>
+  </div>
+  <div class="card warn">
+    <p><strong>別做的事：</strong>狂怒階段的藥劑放著不管（會炸爛你的行堆）、為了打傷害把塔疊到生成區、在沒有光系解法時亂放詛咒火焰。</p>
+  </div>
+</section>
+
+<section id="endless">
+  <h2 class="sec">無限模式</h2>
+  <ul>
+    <li>每 3000 分升一級，下落速度隨等級加快；等級 3 解鎖<span class="el light">光</span>、等級 5 解鎖<span class="el shadow">暗</span>。</li>
+    <li>堆到生成區即結束。紀錄保存：最高分、最高連鎖、最長存活、最多反應、最多四行消除。</li>
+    <li>前期用反應控制盤面高度，中期靠共鳴核心存款，後期速度起來後<em>雷電與超熱蒸氣</em>是唯二的削塔手段——看到風光、火水風的機會不要省。</li>
+  </ul>
+</section>
+
+<section id="faq">
+  <h2 class="sec">常見問題與進階技巧</h2>
+  <h3>Q：方塊一直被反應吃掉，行都消不了？</h3>
+  <p>反應只在「跨拼塊的異元素相鄰」時發生。鋪行時讓接觸面<strong>同元素對同元素</strong>（同元素相鄰是安全的，湊到跨拼塊 4 連才共鳴），或乾脆用拼塊內部的格子墊——內部永遠安全。預覽外框沒亮＝這一手安全。</p>
+  <h3>Q：我的純色拼塊什麼時候會共鳴？</h3>
+  <p>自己不會。但之後有<em>外來的同元素</em>貼上它就會湊成 5 連以上——這其實是主動製造核心的最快路徑：先丟一塊純色，再補一格同色。</p>
+  <h3>Q：連鎖怎麼刷？</h3>
+  <p>三個套路：① 反應埋下層（上層崩落觸發第二波）；② 生長反應自帶兩段（種植 → 綻放）；③ 重力逆轉法術當人工連鎖啟動器。連鎖演出太慢就按住 <kbd>↓</kbd> 快轉。</p>
+  <h3>Q：進度會不會不見？</h3>
+  <p>每次生成新拼塊都自動存檔——關頁、重新整理都能從主選單「繼續遊戲」原地接關，連下一塊拼塊都一模一樣。關卡星級、圖鑑、成就、遺物全部永久保存（清除存檔需二次確認）。</p>
+  <h3>Q：圖鑑的「？？？」怎麼解鎖？</h3>
+  <p>實際觸發過一次該反應即記入圖鑑（含首次發現時間、累計次數與最高單次得分）。集滿 12 種雙元素反應有成就。</p>
+  <h3>進階小抄</h3>
+  <ul>
+    <li><strong>乙太＝最高優先反應</strong>：它永遠湊優先度最高的配方——貼光或暗必出虛空淨化。</li>
+    <li><strong>冰晶經濟學</strong>：冰霜鋪 4 顆冰晶後補一發火焰風暴或符文爆炸，每顆碎冰都有額外分。</li>
+    <li><strong>荒蕪要搶時間</strong>：帶倒數的沙塵在期限內清除有高額淨化分，逾期變岩石雙倍虧。</li>
+    <li><strong>暫存不是垃圾桶</strong>：留一塊含光的拼塊在暫存欄，看到暗元素露頭就換手打湮滅。</li>
+    <li><strong>能量別溢出</strong>：上限 100，滿了就找目標放元素轉化——25 能量換一次精準反應永遠划算。</li>
+  </ul>
+</section>
+
+<footer>
+  <p><a href="./">▶ 回到遊戲</a>　·　<a href="https://tingyudeco.com/portfolio/tools/game-alchemy">作品頁</a>　·　<a href="https://github.com/Ttingyu1123/elemental-alchemy-lab">原始碼</a></p>
+  <p>元素煉金工坊 Elemental Alchemy Lab — 純 Canvas ＋ Web Audio，零框架、零外部素材</p>
+</footer>
+
+</div>
+<a class="backtop" href="#top" aria-label="回到頂部">↑</a>
+</body>
+</html>
