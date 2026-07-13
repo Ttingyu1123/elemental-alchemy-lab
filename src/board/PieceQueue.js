@@ -16,6 +16,8 @@ export class PieceQueue {
     this.bag = [];
     this.queue = [];
     this.recentElements = [];
+    this.pityElements = [];  // 反應目標元素；連 3 塊未出現則強制補給
+    this.pityStreaks = {};
     while (this.queue.length < PREVIEW_COUNT) this.queue.push(this.generate());
   }
 
@@ -57,6 +59,17 @@ export class PieceQueue {
     let distinct = roll < 0.32 ? 1 : roll < 0.9 ? 2 : 3;
     distinct = Math.min(distinct, this.elements.length, blockCount);
     const chosen = this.pickElements(distinct);
+
+    // pity：目標元素連 3 塊沒出現 → 換掉最後一個選中元素
+    for (const el of this.pityElements) {
+      if (!this.elements.includes(el)) continue;
+      if (chosen.includes(el)) { this.pityStreaks[el] = 0; continue; }
+      this.pityStreaks[el] = (this.pityStreaks[el] ?? 0) + 1;
+      if (this.pityStreaks[el] >= 3) {
+        chosen[chosen.length - 1] = el;
+        this.pityStreaks[el] = 0;
+      }
+    }
 
     // 每個選中元素至少出現一次，其餘隨機
     const assignment = [];

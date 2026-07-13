@@ -3,13 +3,21 @@
 import { ALL_REACTIONS } from '../data/reactions.js';
 import { makeCell } from '../board/Board.js';
 import { hitCell, EFFECTS, tickLavaPhase } from './ReactionEffects.js';
-import { chainMultiplier, LINE_SCORES, ENERGY_RESONANCE, ENERGY_CORE } from '../config.js';
+import { chainMultiplier, LINE_SCORES, ENERGY_RESONANCE, ENERGY_CORE, ENERGY_LINE } from '../config.js';
 
 const SORTED = [...ALL_REACTIONS].sort((a, b) => b.priority - a.priority);
 const REACTIVE = new Set(['normal', 'gold']);
 
 function isReagent(cell) {
   return cell && (REACTIVE.has(cell.kind) && cell.el || cell.kind === 'ether');
+}
+
+// 同一拼塊的元素彼此穩定：全部來自同一次鎖定 → 不反應、不共鳴。
+// 效果生成的格子（無 lockId）視為新化合物，不受限。
+function allSameLock(cells) {
+  const first = cells[0]?.lockId;
+  if (first == null) return false;
+  return cells.every(c => c.lockId === first);
 }
 
 // cells 是否能組成 recipe（萬能元素至多 1 個）
@@ -44,6 +52,7 @@ function scanPairs(board, def, reserved, queued) {
         if (reserved.has(key(rr, cc))) continue;
         const b = board.get(rr, cc);
         if (!isReagent(b)) continue;
+        if (allSameLock([a, b])) continue;
         if (matchesRecipe([a, b], def.elements)) {
           reserved.add(key(r, c)); reserved.add(key(rr, cc));
           queued.push({ def, cells: [{ r, c }, { r: rr, c: cc }] });
@@ -70,6 +79,7 @@ function scanTriples(board, def, reserved, queued) {
         const c1 = board.get(p1.r, p1.c);
         const c2 = board.get(p2.r, p2.c);
         if (!isReagent(c1) || !isReagent(c2)) continue;
+        if (allSameLock([center, c1, c2])) continue;
         if (matchesRecipe([center, c1, c2], def.elements)) {
           reserved.add(key(r, c)); reserved.add(key(p1.r, p1.c)); reserved.add(key(p2.r, p2.c));
           queued.push({ def, cells: [{ r, c }, p1, p2] });
@@ -92,11 +102,13 @@ export function findResonanceGroups(board, reserved) {
       if (!cell || !REACTIVE.has(cell.kind) || !cell.el) continue;
       const el = cell.el;
       const group = [];
-      const stack = [[r, c]];
+      const groupCells = [];
+      const stack = [[r, c, cell]];
       visited.add(k);
       while (stack.length) {
-        const [cr, cc] = stack.pop();
+        const [cr, cc, ccell] = stack.pop();
         group.push({ r: cr, c: cc });
+        groupCells.push(ccell);
         for (const [dr, dc] of DIRS) {
           const nr = cr + dr, nc = cc + dc;
           const nk = key(nr, nc);
@@ -104,11 +116,12 @@ export function findResonanceGroups(board, reserved) {
           const ncell = board.get(nr, nc);
           if (ncell && REACTIVE.has(ncell.kind) && ncell.el === el) {
             visited.add(nk);
-            stack.push([nr, nc]);
+            stack.push([nr, nc, ncell]);
           }
         }
       }
-      if (group.length >= 4) groups.push({ el, cells: group });
+      // 單一拼塊自體 4 連不共鳴（純元素拼塊落地不自爆）
+      if (group.length >= 4 && !allSameLock(groupCells)) groups.push({ el, cells: group });
     }
   }
   return groups;
@@ -137,7 +150,7 @@ function bloomPlants(sess, ctx) {
       const k = key(r, c);
       if (visited.has(k)) continue;
       const cell = b.get(r, c);
-      if (!cell || cell.kind !== 'plant') continue;
+      if (!cell || cell.kind !== 'plant' || cell.fresh) continue; // 新生植物下個階段才成熟
       const group = [];
       const stack = [[r, c]];
       visited.add(k);
@@ -148,7 +161,7 @@ function bloomPlants(sess, ctx) {
           const nr = cr + dr, nc = cc + dc, nk = key(nr, nc);
           if (visited.has(nk)) continue;
           const ncell = b.get(nr, nc);
-          if (ncell && ncell.kind === 'plant') { visited.add(nk); stack.push([nr, nc]); }
+          if (ncell && ncell.kind === 'plant' && !ncell.fresh) { visited.add(nk); stack.push([nr, nc]); }
         }
       }
       if (group.length >= 3) {
@@ -165,6 +178,93 @@ function bloomPlants(sess, ctx) {
   return acted;
 }
 
+// ═══ 反應預覽：幽靈落點若鎖定，會觸發哪些反應／共鳴（供渲染高亮）═══
+// ghostBlocks: [{ r, c, cell }]（彼此視為同一未來 lockId，不互相反應）
+export function previewReactions(board, ghostBlocks) {
+  const overlay = new Map();
+  for (const b of ghostBlocks) overlay.set(key(b.r, b.c), b.cell);
+  const get = (r, c) => board.inBounds(r, c) ? (overlay.get(key(r, c)) ?? board.get(r, c)) : null;
+  const isGhost = (r, c) => overlay.has(key(r, c));
+  const reserved = new Set();
+  const out = [];
+
+  // 候選中心：幽靈格與其鄰格
+  const centers = new Map();
+  for (const b of ghostBlocks) {
+    centers.set(key(b.r, b.c), [b.r, b.c]);
+    for (const [dr, dc] of DIRS) centers.set(key(b.r + dr, b.c + dc), [b.r + dr, b.c + dc]);
+  }
+
+  for (const def of SORTED) {
+    if (def.elements.length === 3) {
+      for (const [r, c] of centers.values()) {
+        if (reserved.has(key(r, c))) continue;
+        const center = get(r, c);
+        if (!isReagent(center)) continue;
+        for (const [[d1r, d1c], [d2r, d2c]] of DIR_PAIRS) {
+          const p1 = [r + d1r, c + d1c], p2 = [r + d2r, c + d2c];
+          if (reserved.has(key(...p1)) || reserved.has(key(...p2))) continue;
+          const c1 = get(...p1), c2 = get(...p2);
+          if (!isReagent(c1) || !isReagent(c2)) continue;
+          const trio = [[r, c], p1, p2];
+          const ghosts = trio.filter(([rr, cc]) => isGhost(rr, cc)).length;
+          if (ghosts === 0 || ghosts === 3) continue; // 必須是拼塊×場上的組合
+          if (!matchesRecipe([center, c1, c2], def.elements)) continue;
+          trio.forEach(p => reserved.add(key(...p)));
+          out.push({ cells: trio.map(([rr, cc]) => ({ r: rr, c: cc })), color: def.color });
+          break;
+        }
+      }
+    } else {
+      for (const b of ghostBlocks) {
+        if (reserved.has(key(b.r, b.c))) continue;
+        if (!isReagent(b.cell)) continue;
+        for (const [dr, dc] of DIRS) {
+          const rr = b.r + dr, cc = b.c + dc;
+          if (isGhost(rr, cc) || reserved.has(key(rr, cc))) continue;
+          const other = get(rr, cc);
+          if (!isReagent(other)) continue;
+          if (!matchesRecipe([b.cell, other], def.elements)) continue;
+          reserved.add(key(b.r, b.c)); reserved.add(key(rr, cc));
+          out.push({ cells: [{ r: b.r, c: b.c }, { r: rr, c: cc }], color: def.color });
+          break;
+        }
+      }
+    }
+  }
+
+  // 共鳴預覽：合併視圖 flood fill ≥4 且含至少一個場上格
+  const visited = new Set();
+  for (const b of ghostBlocks) {
+    const cell = b.cell;
+    if (!cell || !REACTIVE.has(cell.kind) || !cell.el) continue;
+    const k0 = key(b.r, b.c);
+    if (visited.has(k0) || reserved.has(k0)) continue;
+    const group = [];
+    let hasBoard = false;
+    const stack = [[b.r, b.c]];
+    visited.add(k0);
+    while (stack.length) {
+      const [cr, cc] = stack.pop();
+      group.push([cr, cc]);
+      if (!isGhost(cr, cc)) hasBoard = true;
+      for (const [dr, dc] of DIRS) {
+        const nr = cr + dr, nc = cc + dc, nk = key(nr, nc);
+        if (visited.has(nk) || reserved.has(nk)) continue;
+        const ncell = get(nr, nc);
+        if (ncell && REACTIVE.has(ncell.kind) && ncell.el === cell.el) {
+          visited.add(nk);
+          stack.push([nr, nc]);
+        }
+      }
+    }
+    if (group.length >= 4 && hasBoard) {
+      out.push({ cells: group.map(([rr, cc]) => ({ r: rr, c: cc })), color: '#ffffff', resonance: true });
+    }
+  }
+  return out;
+}
+
 // ═══ 執行一個連鎖階段；回傳 { acted, reactions } ═══
 export function runPass(sess, chain) {
   const board = sess.board;
@@ -172,6 +272,9 @@ export function runPass(sess, chain) {
   const ctx = { chain, mult, hitGuard: new Set(), sess };
   let acted = false;
   const firedReactions = [];
+
+  // 0) 上一階段新生的植物成熟（本階段結尾即可參與綻放判定）
+  board.forEach((r, c, cell) => { if (cell.kind === 'plant' && cell.fresh) cell.fresh = false; });
 
   // 1) 熔岩熔化
   if (tickLavaPhase(sess, ctx)) acted = true;
@@ -239,6 +342,7 @@ export function runPass(sess, chain) {
     const lineScore = Math.round((LINE_SCORES[Math.min(fullRows.length, 4)] +
       Math.max(0, fullRows.length - 4) * 400) * mult);
     sess.score.addRaw(lineScore);
+    sess.addEnergy(ENERGY_LINE * fullRows.length);
     sess.bus.emit('lines', { count: fullRows.length, rows: fullRows, chain, score: lineScore });
     sess.fx?.lineFx(fullRows, lineScore);
     acted = true;

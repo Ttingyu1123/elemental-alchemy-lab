@@ -1,6 +1,7 @@
 // ═══ Canvas 渲染器＋粒子／浮動文字（純顯示，不改遊戲資料）═══
 import { COLS, VISIBLE_ROWS, HIDDEN_ROWS, MAX_PARTICLES } from '../config.js';
 import { ELEMENTS } from '../data/elements.js';
+import { previewReactions } from '../alchemy/ReactionResolver.js';
 
 // ── 元素圖示（向量繪製，不依賴顏色辨識）──
 export function drawElementIcon(g, el, cx, cy, s) {
@@ -271,6 +272,8 @@ export class BoardRenderer {
     this.floats = [];
     this.flashes = [];
     this.shake = 0;
+    this.pvSig = null;      // 反應預覽快取（盤面版本＋拼塊姿態）
+    this.pvData = [];
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -448,13 +451,15 @@ export class BoardRenderer {
     if (piece && (sess.state === 'falling' || sess.state === 'resolving')) {
       if (sess.state === 'falling') {
         const gy = piece.ghostY(board);
+        const ghostBlocks = piece.blocksAt(piece.x, gy);
         if (gy !== piece.y) {
           g.globalAlpha = 0.25;
-          for (const { r, c, cell } of piece.blocksAt(piece.x, gy)) {
+          for (const { r, c, cell } of ghostBlocks) {
             if (r >= HIDDEN_ROWS) drawCell(g, cell, c * s, (r - HIDDEN_ROWS) * s, s);
           }
           g.globalAlpha = 1;
         }
+        this.drawReactionPreview(g, sess, ghostBlocks, s);
       }
       for (const { r, c, cell } of piece.blocks()) {
         if (r >= HIDDEN_ROWS - 1) drawCell(g, cell, c * s, (r - HIDDEN_ROWS) * s, s);
@@ -525,10 +530,39 @@ export class BoardRenderer {
     g.restore();
   }
 
+  // 反應預覽：以拼塊姿態＋盤面版本快取，只在變動時重算
+  drawReactionPreview(g, sess, ghostBlocks, s) {
+    const sig = `${sess.board.version}:${sess.piece.x}:${sess.piece.rot}`;
+    if (sig !== this.pvSig || this.pvPiece !== sess.piece) {
+      this.pvSig = sig;
+      this.pvPiece = sess.piece;
+      this.pvData = previewReactions(sess.board, ghostBlocks);
+    }
+    if (!this.pvData.length) return;
+    const pulse = 0.45 + 0.35 * Math.sin(performance.now() / 180);
+    g.save();
+    g.lineWidth = Math.max(2, s * 0.08);
+    for (const item of this.pvData) {
+      g.strokeStyle = item.color;
+      g.globalAlpha = item.resonance ? pulse * 0.7 : pulse;
+      if (item.resonance) g.setLineDash([s * 0.18, s * 0.14]);
+      for (const { r, c } of item.cells) {
+        if (r < HIDDEN_ROWS) continue;
+        g.beginPath();
+        g.roundRect(c * s + 2, (r - HIDDEN_ROWS) * s + 2, s - 4, s - 4, s * 0.16);
+        g.stroke();
+      }
+      g.setLineDash([]);
+    }
+    g.restore();
+  }
+
   clearFx() {
     this.particles = [];
     this.floats = [];
     this.flashes = [];
     this.shake = 0;
+    this.pvSig = null;
+    this.pvData = [];
   }
 }

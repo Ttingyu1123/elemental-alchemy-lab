@@ -16,11 +16,13 @@ export class Board {
     this.rows = rows;
     this.hidden = hidden;
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+    this.lockSeq = 0;   // 每次鎖定遞增；同 lockId 的格子彼此「穩定」不反應
+    this.version = 0;   // 內容變動計數（反應預覽快取失效用）
   }
 
   inBounds(r, c) { return r >= 0 && r < this.rows && c >= 0 && c < this.cols; }
   get(r, c) { return this.inBounds(r, c) ? this.grid[r][c] : null; }
-  set(r, c, cell) { if (this.inBounds(r, c)) this.grid[r][c] = cell; }
+  set(r, c, cell) { if (this.inBounds(r, c)) { this.grid[r][c] = cell; this.version++; } }
   isEmpty(r, c) { return this.inBounds(r, c) && this.grid[r][c] === null; }
 
   // blocks: [{ r, c }]；超出左右下邊界或與既有方塊重疊即碰撞（上方超界不算）
@@ -33,9 +35,12 @@ export class Board {
   }
 
   lock(blocks) {
+    this.lockSeq += 1;
     for (const b of blocks) {
+      b.cell.lockId = this.lockSeq; // 同拼塊元素彼此穩定：不互相反應、不自體共鳴
       if (b.r >= 0 && b.r < this.rows) this.grid[b.r][b.c] = b.cell;
     }
+    this.version++;
   }
 
   findFullRows() {
@@ -63,6 +68,7 @@ export class Board {
         }
       }
     }
+    if (moved) this.version++;
     return moved;
   }
 

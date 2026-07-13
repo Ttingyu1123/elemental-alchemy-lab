@@ -16,7 +16,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 900,
-    star2Score: 1200, star3Score: 2500,
+    star2Score: 4000, star3Score: 8000,
     tutorial: true,
   },
   {
@@ -30,7 +30,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 880,
-    star2Score: 1500, star3Score: 3200,
+    star2Score: 4500, star3Score: 9000,
   },
   {
     id: 3, name: '大地初醒', description: '土元素加入。以水潤土，見證生長。',
@@ -44,7 +44,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 850,
-    star2Score: 2500, star3Score: 5000,
+    star2Score: 6000, star3Score: 12000,
   },
   {
     id: 4, name: '風起雲湧', description: '風元素加入。火借風勢，焚盡一切。',
@@ -58,7 +58,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 820,
-    star2Score: 5000, star3Score: 9000,
+    star2Score: 8000, star3Score: 16000,
   },
   {
     id: 5, name: '頑石擋道', description: '岩石不含元素，用火焰風暴或熔岩摧毀它們。',
@@ -75,7 +75,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 800,
-    star2Score: 6000, star3Score: 11000,
+    star2Score: 9000, star3Score: 18000,
   },
   {
     id: 6, name: '共鳴之歌', description: '4 個相同元素相連即共鳴；5 個以上凝成元素核心。',
@@ -89,12 +89,12 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 780,
-    star2Score: 7000, star3Score: 13000,
+    star2Score: 10000, star3Score: 20000,
   },
   {
     id: 7, name: '輝光降臨', description: '光元素加入。聖泉、雷電與生命晶石聽候差遣。',
     availableElements: ['fire', 'water', 'earth', 'air', 'light'],
-    elementWeights: { fire: 0.8, water: 1.0, earth: 0.8, air: 1.0, light: 1.0 },
+    elementWeights: { fire: 0.7, water: 1.0, earth: 0.7, air: 1.1, light: 1.4 },
     specialRates: { gold: 0.025, ether: 0.015 },
     startingBlocks: [],
     objectives: [
@@ -103,7 +103,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 760,
-    star2Score: 8000, star3Score: 15000,
+    star2Score: 12000, star3Score: 22000,
   },
   {
     id: 8, name: '暗影滋長', description: '暗元素與腐蝕現身。腐蝕會擴散，儘快淨化。',
@@ -120,12 +120,12 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 740,
-    star2Score: 10000, star3Score: 18000,
+    star2Score: 13000, star3Score: 24000,
   },
   {
     id: 9, name: '晝夜交蝕', description: '讓光與暗相鄰，見證最稀有的湮滅反應。',
     availableElements: ['fire', 'water', 'earth', 'air', 'light', 'shadow'],
-    elementWeights: { fire: 0.7, water: 0.7, earth: 0.7, air: 0.7, light: 1.2, shadow: 1.2 },
+    elementWeights: { fire: 0.6, water: 0.6, earth: 0.6, air: 0.6, light: 1.5, shadow: 1.5 },
     specialRates: { gold: 0.02, ether: 0.02 },
     startingBlocks: [],
     objectives: [
@@ -134,7 +134,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 720,
-    star2Score: 11000, star3Score: 20000,
+    star2Score: 14000, star3Score: 26000,
   },
   {
     id: 10, name: '三相合一', description: '三種元素齊聚一點，引發高階煉金術。',
@@ -148,7 +148,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 700,
-    star2Score: 14000, star3Score: 24000,
+    star2Score: 16000, star3Score: 30000,
   },
   {
     id: 11, name: '限量委託', description: '工坊接到急件：步數有限，效率至上。',
@@ -165,7 +165,7 @@ export const LEVELS = [
     ],
     moveLimit: 45, timeLimit: null,
     fallMs: 680,
-    star2Score: 15000, star3Score: 26000,
+    star2Score: 18000, star3Score: 32000,
   },
   {
     id: 12, name: '腐化煉金魔像', description: '第一章 Boss。以高階反應與連鎖擊碎魔像。',
@@ -180,7 +180,7 @@ export const LEVELS = [
     ],
     moveLimit: null, timeLimit: null,
     fallMs: 700,
-    star2Score: 18000, star3Score: 30000,
+    star2Score: 20000, star3Score: 36000,
     boss: 'corrupted_golem',
     isBoss: true,
   },

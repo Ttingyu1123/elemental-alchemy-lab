@@ -18,7 +18,8 @@ export const BOSSES = {
       eclipse: 85,
       resonance: 15,
       core: 28,
-      linePer: 6,
+      linePer: 10, // 穩定化改版後消行更常見，上修消行傷害
+
     },
   },
 };

@@ -239,7 +239,7 @@ export const EFFECTS = {
     for (const { r, c } of cells) {
       const old = b.get(r, c);
       if (old) ctx.hitGuard.add(old.id);
-      b.set(r, c, makeCell(null, 'plant'));
+      b.set(r, c, makeCell(null, 'plant', { fresh: true })); // 下個階段才成熟參與綻放
       planted.push([r, c]);
     }
     for (const [r, c] of planted) {
@@ -247,7 +247,7 @@ export const EFFECTS = {
         .filter(([rr, cc]) => b.isEmpty(rr, cc) && rr >= 0);
       if (empties.length) {
         const [rr, cc] = choice(sess.rng, empties);
-        b.set(rr, cc, makeCell(null, 'plant'));
+        b.set(rr, cc, makeCell(null, 'plant', { fresh: true }));
       }
     }
     sess.fx?.burst(cells[0].r, cells[0].c, '#69c56a', 16);

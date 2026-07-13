@@ -19,8 +19,9 @@ export const ENDLESS_SPEED_STEP = 60;  // 無限模式每升一級加速
 export const ENDLESS_MIN_FALL_MS = 90;
 
 // 反應解析
-export const RESOLVE_STEP_MS = 300;  // 每個連鎖 pass 間的演出間隔
-export const MAX_CHAIN = 30;         // 安全連鎖上限
+export const RESOLVE_STEP_MS = 300;      // 每個連鎖 pass 間的演出間隔
+export const FAST_RESOLVE_STEP_MS = 90;  // 按住 ↓/Space 快轉連鎖演出
+export const MAX_CHAIN = 30;             // 安全連鎖上限
 
 // 分數
 export const LINE_SCORES = [0, 100, 300, 600, 1000];
@@ -37,11 +38,12 @@ export function chainMultiplier(chain) {
 
 // 能量
 export const ENERGY_MAX = 100;
-export const ENERGY_PAIR = 6;
+export const ENERGY_PAIR = 5;
 export const ENERGY_TRIPLE = 14;
 export const ENERGY_RESONANCE = 5;
 export const ENERGY_CORE = 8;
 export const ENERGY_CRYSTAL = 18;
+export const ENERGY_LINE = 4; // 反應稀有化後，消行也回能量
 
 // 特殊方塊生成（關卡可覆寫）
 export const DEFAULT_SPECIAL_RATES = { ether: 0.015, gold: 0.02, rune: 0.01 };

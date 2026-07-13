@@ -13,9 +13,10 @@ import { BossSystem } from '../systems/BossSystem.js';
 import { ObjectiveTracker } from '../systems/LevelSystem.js';
 import { aggregateRelicMods } from '../systems/RelicSystem.js';
 import { ENDLESS_CONFIG, LEVELS } from '../data/levels.js';
+import { REACTION_BY_ID } from '../data/reactions.js';
 import {
   BASE_FALL_MS, SOFT_DROP_MS, LOCK_DELAY_MS, LOCK_RESET_MAX,
-  RESOLVE_STEP_MS, MAX_CHAIN, ENERGY_MAX,
+  RESOLVE_STEP_MS, FAST_RESOLVE_STEP_MS, MAX_CHAIN, ENERGY_MAX,
   HARD_DROP_SCORE_PER_ROW, SOFT_DROP_SCORE_PER_ROW,
   ENDLESS_SPEED_STEP, ENDLESS_MIN_FALL_MS,
 } from '../config.js';
@@ -39,6 +40,18 @@ export class GameSession {
       applyStartingBlocks(this.board, levelDef.startingBlocks, this.rng, cfg.availableElements);
     }
     this.queue = new PieceQueue(this.rng, cfg);
+    // pity：反應目標所需元素太久沒出現時強制補給
+    if (mode === 'level') {
+      const pity = new Set();
+      for (const o of levelDef.objectives) {
+        if (o.type === 'reaction') {
+          for (const el of REACTION_BY_ID[o.reactionId]?.elements ?? []) {
+            if (cfg.availableElements.includes(el)) pity.add(el);
+          }
+        }
+      }
+      this.queue.pityElements = [...pity];
+    }
     this.score = new ScoreSystem();
     this.energy = 0;
     this.relicMods = aggregateRelicMods(app.save.data.ownedRelics);
@@ -55,6 +68,7 @@ export class GameSession {
     this.lockTimer = 0;
     this.lockResets = 0;
     this.resolveTimer = 0;
+    this.fastResolve = false;
     this.chain = 0;
     this.maxChain = 0;
     this.lockCount = 0;
@@ -113,7 +127,9 @@ export class GameSession {
     if (this.state === 'over' || this.state === 'won') return;
     this.bus.emit('playerAction', action);
     if (this.state !== 'falling' || !this.piece) {
-      if (action === 'softOff') this.softDrop = false;
+      // 解析中按住 ↓ 或按 Space：快轉連鎖演出
+      if (this.state === 'resolving' && (action === 'softOn' || action === 'hard')) this.fastResolve = true;
+      if (action === 'softOff') { this.softDrop = false; this.fastResolve = false; }
       return;
     }
     switch (action) {
@@ -220,7 +236,7 @@ export class GameSession {
       }
     } else if (this.state === 'resolving') {
       this.resolveTimer += dt;
-      if (this.resolveTimer >= RESOLVE_STEP_MS) {
+      if (this.resolveTimer >= (this.fastResolve ? FAST_RESOLVE_STEP_MS : RESOLVE_STEP_MS)) {
         this.resolveTimer = 0;
         this.stepResolve();
       }
@@ -271,6 +287,7 @@ export class GameSession {
   }
 
   finishResolution() {
+    this.fastResolve = false;
     this.bus.emit('chainEnd', { chain: this.chain });
 
     if (this.board.stackReachedTop()) { this.gameOver('topout'); return; }
