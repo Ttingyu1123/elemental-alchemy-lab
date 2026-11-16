@@ -142,13 +142,17 @@
 .touch-controls {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0;
-  justify-content: space-between;
+  justify-content: space-between; gap: 8px;
   padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
   z-index: 40; pointer-events: none;
 }
-.touch-group { display: flex; gap: 8px; pointer-events: auto; }
+/* 七顆鈕固定寬度合計 508px，窄螢幕會把「落下」擠出畫面：改成按比例縮、上限維持原尺寸 */
+.touch-group { display: flex; gap: 8px; pointer-events: auto; min-width: 0; }
+.touch-group:first-child { flex: 3 1 0; }
+.touch-group:last-child { flex: 4.6 1 0; justify-content: flex-end; }
 .touch-btn {
-  width: 58px; height: 58px;
+  flex: 1 1 0; min-width: 0; max-width: 58px; padding: 0;
+  height: 58px;
   border-radius: 14px;
   background: rgba(50, 40, 95, 0.82);
   border: 1px solid rgba(232,194,106,0.4);
@@ -156,7 +160,7 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.touch-btn.wide { width: 96px; font-size: 1rem; }
+.touch-btn.wide { flex: 1.6 1 0; max-width: 96px; font-size: 1rem; white-space: nowrap; }
 .touch-btn:active { background: rgba(120, 90, 220, 0.85); }
 
 @media (pointer: coarse) {
